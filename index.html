@@ -334,8 +334,7 @@ body {
   border: none;
   cursor: pointer;
   font-family: 'Nunito', sans-serif;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 10px; font-weight: 800;
   color: var(--t1);
   letter-spacing: 0.04em;
   pointer-events: auto;
@@ -369,8 +368,7 @@ body {
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: var(--acc-deep);
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 15px; font-weight: 800;
   transition: all 0.15s;
   flex-shrink: 0;
   font-family: monospace;
@@ -391,13 +389,11 @@ body {
   outline: none;
   cursor: pointer;
   pointer-events: auto;
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   touch-action: manipulation;
 }
 .zoom-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
+  -webkit-appearance: none; appearance: none;
   width: 18px; height: 18px;
   border-radius: 50%;
   background: var(--acc-deep);
@@ -431,8 +427,7 @@ body {
   border: 1.5px solid var(--acc-border);
   border-radius: 100px;
   padding: 5px 13px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 11px; font-weight: 800;
   color: var(--acc-deep);
   letter-spacing: 0.04em;
 }
@@ -451,19 +446,15 @@ body {
   margin-bottom: 12px;
 }
 .divider span {
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 9px; font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--t3);
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  display: flex; align-items: center; gap: 5px;
 }
 .divider-line {
-  flex: 1;
-  height: 1.5px;
+  flex: 1; height: 1.5px;
   background-image: linear-gradient(to right, var(--border) 50%, transparent 50%);
   background-size: 6px 1.5px;
   background-repeat: repeat-x;
@@ -485,7 +476,7 @@ body {
 .track:hover { background: var(--bg2); }
 .track:hover .t-num { display: none; }
 .track:hover .t-play { display: flex; }
-.track:hover .t-del-wrap { opacity: 1; pointer-events: all; }
+.track:hover .t-actions-wrap { opacity: 1; pointer-events: all; }
 
 .t-num {
   font-size: 11px; font-weight: 700;
@@ -533,15 +524,21 @@ body {
   border: none; background: none; cursor: pointer;
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--t3);
-  text-decoration: none;
+  color: var(--t3); text-decoration: none;
   transition: all 0.15s;
   flex-shrink: 0;
 }
 .t-link-btn:hover { background: var(--acc-bg); color: var(--acc-deep); }
 
-.t-del-wrap { display: flex; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
-.t-del {
+/* Changed to actions-wrap to hold edit/up/down/del */
+.t-actions-wrap {
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  gap: 2px;
+}
+.t-btn {
   width: 28px; height: 28px;
   border: none; background: none; cursor: pointer;
   border-radius: 8px;
@@ -549,7 +546,8 @@ body {
   color: var(--t3);
   transition: all 0.15s;
 }
-.t-del:hover { background: #fff0f3; color: #f43f5e; }
+.t-btn:hover { background: var(--acc-bg); color: var(--acc-deep); }
+.t-btn.del-btn:hover { background: #fff0f3; color: #f43f5e; }
 
 /* ─── EMPTY ─── */
 .empty {
@@ -611,10 +609,7 @@ body {
 }
 
 .modal-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
 }
 .modal-top h2 { font-size: 17px; font-weight: 800; color: var(--t1); }
 .modal-x {
@@ -630,21 +625,12 @@ body {
 
 /* Tab bar */
 .tabs {
-  display: flex;
-  background: var(--bg2);
-  border-radius: 12px;
-  padding: 3px;
-  margin-bottom: 16px;
-  gap: 3px;
+  display: flex; background: var(--bg2); border-radius: 12px; padding: 3px; margin-bottom: 16px; gap: 3px;
 }
 .tab {
-  flex: 1;
-  padding: 9px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px; font-weight: 800;
-  border: none; background: none;
-  border-radius: 10px; cursor: pointer;
-  color: var(--t3);
+  flex: 1; padding: 9px;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  border: none; background: none; border-radius: 10px; cursor: pointer; color: var(--t3);
   transition: all 0.15s;
 }
 .tab.on { background: var(--card); color: var(--t1); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
@@ -655,39 +641,21 @@ body {
 /* Form */
 .fg { margin-bottom: 12px; }
 .fg > label {
-  display: block;
-  font-size: 10px; font-weight: 800;
-  color: var(--t2);
-  margin-bottom: 5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  display: block; font-size: 10px; font-weight: 800; color: var(--t2); margin-bottom: 5px;
+  letter-spacing: 0.1em; text-transform: uppercase;
 }
-.fg input[type="text"],
-.fg input[type="url"] {
-  width: 100%;
-  padding: 11px 13px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 14px; font-weight: 500;
-  border: 1.5px solid var(--border2);
-  border-radius: 12px;
-  background: var(--bg2);
-  color: var(--t1);
-  outline: none;
-  transition: all 0.18s;
+.fg input[type="text"], .fg input[type="url"] {
+  width: 100%; padding: 11px 13px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 500;
+  border: 1.5px solid var(--border2); border-radius: 12px; background: var(--bg2); color: var(--t1);
+  outline: none; transition: all 0.18s;
 }
 .fg input:focus { border-color: var(--acc); background: var(--card); box-shadow: 0 0 0 3px var(--acc-light); }
 .fg input::placeholder { color: var(--t3); }
 
 /* YT preview card */
 .yt-card {
-  display: none;
-  align-items: center;
-  gap: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1.5px solid var(--acc-border);
-  margin-bottom: 12px;
-  background: var(--acc-bg);
+  display: none; align-items: center; gap: 0; border-radius: 12px; overflow: hidden;
+  border: 1.5px solid var(--acc-border); margin-bottom: 12px; background: var(--acc-bg);
 }
 .yt-card.show { display: flex; }
 .yt-card img { width: 88px; height: 56px; object-fit: cover; flex-shrink: 0; }
@@ -697,9 +665,7 @@ body {
 
 /* Status */
 .status-msg {
-  font-size: 11px; font-weight: 700;
-  padding: 8px 12px; border-radius: 10px;
-  margin-bottom: 10px; display: none;
+  font-size: 11px; font-weight: 700; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; display: none;
 }
 .status-msg.load { background: #fef9e8; color: #b45309; border: 1px solid #fde68a; display: block; }
 .status-msg.err  { background: #fff0f3; color: #f43f5e; border: 1px solid #fecdd3; display: block; }
@@ -707,15 +673,8 @@ body {
 
 /* Upload zone */
 .upload-zone {
-  border: 1.5px dashed var(--border2);
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.18s;
-  background: var(--bg2);
-  position: relative;
-  margin-bottom: 10px;
+  border: 1.5px dashed var(--border2); border-radius: 12px; padding: 16px; text-align: center;
+  cursor: pointer; transition: all 0.18s; background: var(--bg2); position: relative; margin-bottom: 10px;
 }
 .upload-zone:hover { border-color: var(--acc); background: var(--acc-bg); }
 .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
@@ -725,26 +684,13 @@ body {
 /* Footer buttons */
 .modal-foot { margin-top: 18px; display: flex; gap: 8px; justify-content: flex-end; }
 .btn-ghost {
-  padding: 11px 16px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border2);
-  background: none;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px; font-weight: 700;
-  color: var(--t2); cursor: pointer;
-  transition: all 0.15s;
+  padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border2); background: none;
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; color: var(--t2); cursor: pointer; transition: all 0.15s;
 }
 .btn-ghost:hover { background: var(--bg2); }
 .btn-primary {
-  padding: 11px 18px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, var(--acc), var(--acc-deep));
-  color: #fff;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px; font-weight: 800;
-  cursor: pointer;
-  transition: all 0.18s;
+  padding: 11px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--acc), var(--acc-deep));
+  color: #fff; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.18s;
   box-shadow: 0 3px 10px var(--acc-btn-shadow);
 }
 .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); }
@@ -753,84 +699,46 @@ body {
    SETTINGS PANEL
 ════════════════════════ */
 .settings-bg {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(58,34,48,0.18);
-  backdrop-filter: blur(2px);
-  z-index: 400;
+  display: none; position: fixed; inset: 0; background: rgba(58,34,48,0.18); backdrop-filter: blur(2px); z-index: 400;
 }
 .settings-bg.open { display: block; }
 
 .settings-panel {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: 280px;
-  background: var(--card);
-  z-index: 450;
-  padding: 28px 20px;
-  overflow-y: auto;
-  box-shadow: -4px 0 28px rgba(0,0,0,0.10);
-  transform: translateX(100%);
-  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  position: fixed; top: 0; right: 0; bottom: 0; width: 280px; background: var(--card); z-index: 450;
+  padding: 28px 20px; overflow-y: auto; box-shadow: -4px 0 28px rgba(0,0,0,0.10);
+  transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .settings-panel.open { transform: translateX(0); }
 .settings-panel h2 {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 22px;
-  color: var(--t1);
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  font-size: 16px; font-weight: 800; margin-bottom: 22px; color: var(--t1); display: flex; align-items: center; gap: 7px;
 }
 
 .setting-block { margin-bottom: 24px; }
 .setting-block h3 {
-  font-size: 9px; font-weight: 800;
-  color: var(--t3); letter-spacing: 0.18em;
+  font-size: 9px; font-weight: 800; color: var(--t3); letter-spacing: 0.18em;
   text-transform: uppercase; margin-bottom: 10px;
 }
 
 /* Color swatches */
 .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
 .swatch {
-  aspect-ratio: 1;
-  border-radius: 11px;
-  cursor: pointer;
-  border: 2.5px solid transparent;
-  transition: all 0.16s;
-  position: relative;
-  padding: 0;
+  aspect-ratio: 1; border-radius: 11px; cursor: pointer; border: 2.5px solid transparent; transition: all 0.16s; position: relative; padding: 0;
 }
 .swatch:hover { transform: scale(0.9); }
-.swatch.on {
-  border-color: #fff;
-  box-shadow: 0 0 0 2.5px var(--t1);
-  transform: scale(0.88);
-}
+.swatch.on { border-color: #fff; box-shadow: 0 0 0 2.5px var(--t1); transform: scale(0.88); }
 .swatch.on::after {
-  content: '✓';
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 13px; font-weight: 900;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 13px; font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .custom-color-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px;
-  background: var(--bg2);
-  border-radius: 11px;
-  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+  background: var(--bg2); border-radius: 11px; border: 1.5px solid var(--border2);
 }
 .custom-color-row label { font-size: 11px; font-weight: 700; color: var(--t2); }
 #custom-color {
-  width: 34px; height: 34px;
-  border-radius: 8px; border: none;
-  cursor: pointer; padding: 2px;
-  background: none;
-  -webkit-appearance: none;
-  appearance: none;
+  width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; padding: 2px;
+  background: none; -webkit-appearance: none; appearance: none;
 }
 #custom-color::-webkit-color-swatch-wrapper { padding: 0; border-radius: 6px; }
 #custom-color::-webkit-color-swatch { border: none; border-radius: 6px; }
@@ -838,89 +746,36 @@ body {
 /* BG picker — clearly differentiated swatches */
 .bg-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 .bg-btn {
-  padding: 0;
-  border: 2px solid var(--border2);
-  border-radius: 12px;
-  cursor: pointer;
-  font-family: 'Nunito', sans-serif;
-  font-size: 10px; font-weight: 800;
-  color: var(--t2); text-align: center;
-  background: var(--card);
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
+  padding: 0; border: 2px solid var(--border2); border-radius: 12px; cursor: pointer; font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 800; color: var(--t2); text-align: center; background: var(--card);
+  transition: all 0.2s; position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent;
 }
-.bg-btn-sw {
-  display: block;
-  height: 40px;
-  position: relative;
-}
+.bg-btn-sw { display: block; height: 40px; position: relative; }
 .bg-btn-sw.white { background: #ffffff; }
 .bg-btn-sw.soft  { background: #fdf2f8; }
 .bg-btn-sw.blush { background: #ffd7e3; }
 .bg-btn-sw::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+  content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.2s;
   background-image: linear-gradient(135deg, transparent 49%, rgba(244,164,200,0.12) 49%, rgba(244,164,200,0.12) 51%, transparent 51%);
   background-size: 8px 8px;
-  opacity: 0;
-  transition: opacity 0.2s;
 }
-.bg-btn-sw.soft::after,
-.bg-btn-sw.blush::after { opacity: 1; }
+.bg-btn-sw.soft::after, .bg-btn-sw.blush::after { opacity: 1; }
 .bg-btn-sw.blush::after {
   background-image: linear-gradient(135deg, transparent 49%, rgba(244,164,200,0.25) 49%, rgba(244,164,200,0.25) 51%, transparent 51%);
 }
-.bg-btn-label {
-  display: block;
-  padding: 8px 4px;
-  border-top: 1px solid var(--border);
-}
-.bg-btn.on {
-  border-color: var(--acc-deep);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(244,164,200,0.32);
-}
-.bg-btn.on .bg-btn-label {
-  background: var(--acc-bg);
-  color: var(--acc-deep);
-  border-top-color: var(--acc-border);
-}
+.bg-btn-label { display: block; padding: 8px 4px; border-top: 1px solid var(--border); }
+.bg-btn.on { border-color: var(--acc-deep); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(244,164,200,0.32); }
+.bg-btn.on .bg-btn-label { background: var(--acc-bg); color: var(--acc-deep); border-top-color: var(--acc-border); }
 .bg-btn.on::before {
-  content: '✓';
-  position: absolute;
-  top: 4px; right: 5px;
-  width: 16px; height: 16px;
-  background: var(--acc-deep);
-  color: #fff;
-  border-radius: 50%;
-  font-size: 10px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  animation: pop-in 0.25s cubic-bezier(0.34,1.4,0.64,1);
+  content: '✓'; position: absolute; top: 4px; right: 5px; width: 16px; height: 16px; background: var(--acc-deep); color: #fff;
+  border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+  z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.15); animation: pop-in 0.25s cubic-bezier(0.34,1.4,0.64,1);
 }
-@keyframes pop-in {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
-}
+@keyframes pop-in { from { transform: scale(0); } to { transform: scale(1); } }
 
 .close-panel {
-  width: 100%; padding: 11px;
-  border: 1.5px solid var(--border2);
-  border-radius: 12px;
-  background: none;
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px; font-weight: 800;
-  color: var(--t2); cursor: pointer;
-  transition: all 0.15s;
-  margin-top: 6px;
-  letter-spacing: 0.05em;
+  width: 100%; padding: 11px; border: 1.5px solid var(--border2); border-radius: 12px; background: none; font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 800; color: var(--t2); cursor: pointer; transition: all 0.15s; margin-top: 6px; letter-spacing: 0.05em;
 }
 .close-panel:hover { background: var(--bg2); }
 
@@ -937,7 +792,6 @@ body {
 </head>
 <body>
 
-<!-- Animated background orbs -->
 <div class="bg-deco" aria-hidden="true">
   <div class="bg-orb orb-1"></div>
   <div class="bg-orb orb-2"></div>
@@ -947,7 +801,6 @@ body {
 
 <div class="wrap" id="snap">
 
-  <!-- ── Topbar ── -->
   <header class="topbar">
     <div class="logo-area">
       <span class="logo-label">playlist</span>
@@ -973,7 +826,6 @@ body {
     </div>
   </header>
 
-  <!-- ── Pair Photo ── -->
   <div class="pair-wrap" id="pair-wrap">
     <div class="pair-placeholder" id="pair-ph">
       <div class="ph-icon">
@@ -1006,7 +858,6 @@ body {
     <input type="file" accept="image/*" id="pair-change-input" style="display:none">
   </div>
 
-  <!-- ── Meta row ── -->
   <div class="meta-row">
     <div class="meta-pill">
       <svg class="meta-heart" viewBox="0 0 24 22" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.5 8 2.5 3 7 3c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4.5 0 6.5 5 4.5 9-2.5 4.5-9.5 9-9.5 9z"/></svg>
@@ -1014,7 +865,6 @@ body {
     </div>
   </div>
 
-  <!-- ── Divider ── -->
   <div class="divider">
     <div class="divider-line"></div>
     <span>
@@ -1024,7 +874,6 @@ body {
     <div class="divider-line"></div>
   </div>
 
-  <!-- ── Track list ── -->
   <div id="tracklist">
     <div class="empty" id="empty-state">
       <div class="empty-icon">
@@ -1035,19 +884,16 @@ body {
     </div>
   </div>
 
-</div><!-- #snap -->
-
-<!-- ═══ Add Modal ═══ -->
-<div class="modal-bg" id="modal-bg">
+</div><div class="modal-bg" id="modal-bg">
   <div class="modal">
     <div class="modal-top">
-      <h2>트랙 추가</h2>
+      <h2 id="modal-title">트랙 추가</h2>
       <button class="modal-x" onclick="closeModal()">✕</button>
     </div>
 
     <div class="tabs">
-      <button class="tab on" onclick="swTab('yt', this)">유튜브</button>
-      <button class="tab" onclick="swTab('manual', this)">직접 입력</button>
+      <button class="tab on" id="tab-yt" onclick="swTab('yt', this)">유튜브</button>
+      <button class="tab" id="tab-manual" onclick="swTab('manual', this)">직접 입력</button>
     </div>
 
     <div class="pane on" id="pane-yt">
@@ -1102,12 +948,11 @@ body {
 
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeModal()">취소</button>
-      <button class="btn-primary" onclick="addTrack()">추가하기</button>
+      <button class="btn-primary" id="submit-btn" onclick="submitTrack()">추가하기</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ Settings Panel ═══ -->
 <div class="settings-bg" id="settings-bg" onclick="closeSettings()"></div>
 <div class="settings-panel" id="settings-panel">
   <h2>
@@ -1165,6 +1010,7 @@ let state = {
   imgPos:  LS.get('fp7_imgPos')  || null,
 };
 let manualThumb = null, pendingYt = null, ytTimer = null, curTab = 'yt';
+let editingIndex = -1; // 트랙 수정을 위한 인덱스 상태 추가
 
 /* ══════════════════════════════
    ELEMENTS (cached)
@@ -1227,9 +1073,8 @@ let imgState = { scale: 1, x: 0, y: 0 };
 let minScale = 1;
 const MAX_ZOOM_FACTOR = 4;
 
-// Pan/pinch drag state
-let panDrag = null;     // { startX, startY, origX, origY }
-let pinchDrag = null;   // { startDist, startScale }
+let panDrag = null;
+let pinchDrag = null;
 
 function onPairFile(e) {
   const f = e.target.files && e.target.files[0];
@@ -1328,31 +1173,25 @@ function isControlTarget(e) {
 }
 
 function bindPhotoEvents() {
-  // Placeholder file input
   $('pair-input').addEventListener('change', onPairFile);
   $('pair-change-input').addEventListener('change', onPairFile);
 
-  // Change photo
   $('change-photo-btn').addEventListener('click', e => {
     e.stopPropagation();
     $('pair-change-input').click();
   });
 
-  // Zoom controls
   $('z-in').addEventListener('click', e => { e.stopPropagation(); zoomIn(); });
   $('z-out').addEventListener('click', e => { e.stopPropagation(); zoomOut(); });
   $('z-reset').addEventListener('click', e => { e.stopPropagation(); resetZoom(); });
 
-  // Slider — input + change for max compatibility
   const onSliderInput = e => { setZoomFactor(parseFloat(e.target.value)); };
   elSlider.addEventListener('input', onSliderInput);
   elSlider.addEventListener('change', onSliderInput);
-  // Stop slider drag from propagating to wrap (otherwise pan starts)
   ['mousedown', 'touchstart', 'pointerdown'].forEach(evt => {
     elSlider.addEventListener(evt, e => e.stopPropagation());
   });
 
-  /* ═════ MOUSE PAN ═════ */
   elWrap.addEventListener('mousedown', e => {
     if (!elWrap.classList.contains('has-img')) return;
     if (isControlTarget(e)) return;
@@ -1379,7 +1218,6 @@ function bindPhotoEvents() {
     elWrap.classList.remove('dragging');
   });
 
-  /* ═════ WHEEL ZOOM ═════ */
   elWrap.addEventListener('wheel', e => {
     if (!elWrap.classList.contains('has-img')) return;
     e.preventDefault();
@@ -1387,7 +1225,6 @@ function bindPhotoEvents() {
     setZoomFactor((imgState.scale / minScale) * factor);
   }, { passive: false });
 
-  /* ═════ TOUCH PAN + PINCH ═════ */
   elWrap.addEventListener('touchstart', e => {
     if (!elWrap.classList.contains('has-img')) return;
     if (isControlTarget(e)) return;
@@ -1465,6 +1302,7 @@ function render() {
            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
          </a>` : `<span></span>`;
 
+    // 추가된 버튼들 (위로, 아래로, 수정, 삭제)
     row.innerHTML = `
       <span class="t-num">${i + 1}</span>
       <span class="t-play">
@@ -1476,13 +1314,17 @@ function render() {
         <div class="t-artist">${esc(t.artist || '—')}</div>
       </div>
       ${linkHTML}
-      <div class="t-del-wrap">
-        <button class="t-del" data-i="${i}" title="삭제">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        </button>
+      <div class="t-actions-wrap">
+        ${i > 0 ? `<button class="t-btn up-btn" title="위로"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg></button>` : `<div style="width:28px"></div>`}
+        ${i < n - 1 ? `<button class="t-btn down-btn" title="아래로"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>` : `<div style="width:28px"></div>`}
+        <button class="t-btn edit-btn" title="수정"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="t-btn del-btn" title="삭제"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
       </div>`;
 
-    row.querySelector('.t-del').addEventListener('click', () => {
+    if (i > 0) row.querySelector('.up-btn').addEventListener('click', () => moveTrack(i, -1));
+    if (i < n - 1) row.querySelector('.down-btn').addEventListener('click', () => moveTrack(i, 1));
+    row.querySelector('.edit-btn').addEventListener('click', () => openEditModal(i));
+    row.querySelector('.del-btn').addEventListener('click', () => {
       if (confirm('이 트랙을 삭제할까요?')) { state.tracks.splice(i, 1); save(); render(); }
     });
     list.appendChild(row);
@@ -1491,9 +1333,53 @@ function render() {
 function save() { LS.set('fp7_tracks', state.tracks); }
 
 /* ══════════════════════════════
-   MODAL
+   TRACK MOVEMENT
 ══════════════════════════════ */
-function openModal() { $('modal-bg').classList.add('open'); reset(); }
+function moveTrack(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.tracks.length) return;
+  const temp = state.tracks[idx];
+  state.tracks[idx] = state.tracks[newIdx];
+  state.tracks[newIdx] = temp;
+  save(); render();
+}
+
+/* ══════════════════════════════
+   MODAL (ADD & EDIT)
+══════════════════════════════ */
+function openModal() {
+  editingIndex = -1;
+  $('modal-bg').classList.add('open');
+  reset();
+  $('modal-title').textContent = '트랙 추가';
+  $('submit-btn').textContent = '추가하기';
+}
+
+function openEditModal(i) {
+  editingIndex = i;
+  const t = state.tracks[i];
+  $('modal-bg').classList.add('open');
+  reset();
+  
+  $('modal-title').textContent = '트랙 수정';
+  $('submit-btn').textContent = '수정하기';
+
+  // 수정을 위해 '직접 입력' 탭으로 기본 이동
+  swTab('manual', $('tab-manual'));
+
+  $('m-title').value = t.title || '';
+  $('m-artist').value = t.artist || '';
+  $('m-link').value = t.link || '';
+
+  if (t.thumb && t.thumb.startsWith('data:')) {
+     manualThumb = t.thumb;
+     const img = $('upthumb');
+     img.src = manualThumb; img.style.display = 'block';
+  } else {
+     $('m-imgurl').value = t.thumb || '';
+  }
+}
+
 function closeModal() { $('modal-bg').classList.remove('open'); }
 document.addEventListener('DOMContentLoaded', () => {
   $('modal-bg').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
@@ -1602,9 +1488,9 @@ function onThumbFile(e) {
 }
 
 /* ══════════════════════════════
-   ADD TRACK
+   SUBMIT TRACK (ADD OR EDIT)
 ══════════════════════════════ */
-function addTrack() {
+function submitTrack() {
   let track;
   if (curTab === 'yt') {
     if (!pendingYt) { setMsg('유튜브 URL을 먼저 입력해 주세요', 'err'); return; }
@@ -1624,7 +1510,13 @@ function addTrack() {
       link:   $('m-link').value.trim()
     };
   }
-  state.tracks.push(track);
+  
+  if (editingIndex > -1) {
+    state.tracks[editingIndex] = track;
+  } else {
+    state.tracks.push(track);
+  }
+  
   save(); render(); closeModal();
 }
 
@@ -1755,10 +1647,9 @@ function applyAccent(hex, activeBtn) {
 }
 
 /* ══════════════════════════════
-   BACKGROUND  (FIXED + ROBUST)
+   BACKGROUND
 ══════════════════════════════ */
 function bindBgButtons() {
-  // Event delegation on parent so it always works
   elBgRow.addEventListener('click', e => {
     const btn = e.target.closest('.bg-btn');
     if (!btn) return;
