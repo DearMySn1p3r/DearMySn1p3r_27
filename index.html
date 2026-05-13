@@ -1547,65 +1547,129 @@ async function doCapture(e) {
   btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>`;
   btn.disabled = true;
 
-  /* 수정된 부분: 캡쳐 시 숨길 요소에 바로가기 버튼(.t-link-btn) 추가 */
+  /* 캡쳐 시 숨길 요소: 컨트롤/링크 버튼 */
   const hide = document.querySelectorAll('.topbar-btns, .pair-controls, .t-link-btn');
   hide.forEach(el => el.style.visibility = 'hidden');
 
   const snapEl = $('snap');
-  
-  /* 수정된 부분: html2canvas는 div 배경 이미지 비율 유지(cover)를 img 태그보다 잘 처리합니다. 
-     CORS 문제를 피하기 위해 원격 이미지를 Base64로 변환하는 로직을 img 태그뿐만 아니라 
-     div의 backgroundImage에도 적용하도록 확장했습니다.
-  */
-  const targets = [];
-  // 1. img 태그들 (메인 사진 등)
-  snapEl.querySelectorAll('img').forEach(el => targets.push({el, type: 'img'}));
-  // 2. 앨범 커버 div들
-  snapEl.querySelectorAll('.t-art').forEach(el => targets.push({el, type: 'bg'}));
 
-  const origState = []; // 원래 소스/배경을 저장할 배열
-
-  for (const item of targets) {
-    let src = '';
-    if (item.type === 'img') {
-      src = item.el.src;
-    } else {
-      // url("...") 형태에서 URL만 추출
-      const bgImg = item.el.style.backgroundImage;
-      if (bgImg && bgImg.startsWith('url')) {
-        src = bgImg.slice(5, -2).replace(/"/g, "");
+  /* ▼▼▼ 1) 원격 이미지(http) → Base64 변환 (CORS 우회) ▼▼▼ */
+  const httpTargets = [];
+  snapEl.querySelectorAll('img').forEach(el => {
+    if (el.src && el.src.startsWith('http') && el.style.display !== 'none') {
+      httpTargets.push({el, type: 'img', orig: el.src});
+    }
+  });
+  snapEl.querySelectorAll('.t-art').forEach(el => {
+    const bgImg = el.style.backgroundImage;
+    if (bgImg && bgImg.startsWith('url')) {
+      const src = bgImg.slice(5, -2).replace(/"/g, "");
+      if (src.startsWith('http')) {
+        httpTargets.push({el, type: 'bg', orig: bgImg, src});
       }
     }
+  });
 
-    // 초기 상태 저장
-    origState.push({item, src: item.type === 'img' ? src : item.el.style.backgroundImage});
-
-    // 원격 이미지이고 none이 아닌 경우 Base64 변환 시도
-    if (src && src.startsWith('http') && item.el.style.display !== 'none') {
-      try {
-        const r = await fetch(src, { mode: 'cors' });
-        if (r.ok) { 
-          const b = await r.blob(); 
-          const b64 = await blobToB64(b);
-          if (item.type === 'img') {
-            item.el.src = b64;
-          } else {
-            item.el.style.backgroundImage = `url("${b64}")`;
-          }
-        }
-      } catch (_) {
-        console.warn('Failed to convert image to Base64:', src);
+  for (const t of httpTargets) {
+    try {
+      const r = await fetch(t.type === 'img' ? t.orig : t.src, { mode: 'cors' });
+      if (r.ok) {
+        const b64 = await blobToB64(await r.blob());
+        if (t.type === 'img') t.el.src = b64;
+        else t.el.style.backgroundImage = `url("${b64}")`;
       }
-    }
+    } catch (_) { console.warn('Base64 convert failed'); }
   }
+
+  /* ▼▼▼ 2) 앨범커버 background-image를 사전 정사각형 크롭본으로 교체 ▼▼▼
+     DOM 구조는 그대로 유지(div는 그대로). bg-image 소스만 1:1 정사각형으로 바꿈.
+     - 1:1 소스 + 1:1 박스 = cover가 왜곡 없이 그대로 표시 → 가로 납작 현상 없음
+     - 416×416 고해상도 PNG → html2canvas 다운샘플 시 화질 양호
+     - DOM swap 없음 → 그리드 컬럼(모바일 46px / 데스크탑 52px) 영향 없음 */
+  const cropToSquare = (src, outSize) => new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    let done = false;
+    const finish = r => { if (!done) { done = true; resolve(r); } };
+    img.onload = () => {
+      try {
+        const cv = document.createElement('canvas');
+        cv.width = outSize;
+        cv.height = outSize;
+        const ctx = cv.getContext('2d');
+        const min = Math.min(img.naturalWidth, img.naturalHeight);
+        const sx = (img.naturalWidth - min) / 2;
+        const sy = (img.naturalHeight - min) / 2;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, outSize, outSize);
+        finish(cv.toDataURL('image/png'));
+      } catch (e) {
+        finish(src); // CORS taint 발생 시 원본 반환
+      }
+    };
+    img.onerror = () => finish(src);
+    setTimeout(() => finish(src), 6000);
+    img.src = src;
+  });
+
+  // 모든 .t-art 의 bg-image를 병렬로 사전 크롭
+  const tArts = Array.from(snapEl.querySelectorAll('.t-art'));
+  const tArtRestore = [];
+  const cropResults = await Promise.all(tArts.map(async div => {
+    const bgImg = div.style.backgroundImage;
+    if (!bgImg || !bgImg.startsWith('url')) return null;
+    const src = bgImg.slice(5, -2).replace(/"/g, "");
+    const squareSrc = await cropToSquare(src, 416);
+    return { div, squareSrc, origBg: bgImg };
+  }));
+
+  cropResults.forEach(r => {
+    if (!r) return;
+    // div 안에 img를 자식으로 삽입 (그리드 레이아웃에 영향 없음)
+    // - div는 그대로 그리드 셀 차지 → 폭 충돌 없음
+    // - img는 position:absolute로 div를 100% 채움 → 항상 정사각형 유지
+    // - img 태그라서 html2canvas 화질도 좋음
+    const origPosition = r.div.style.position;
+    r.div.style.position = 'relative';
+    r.div.style.backgroundImage = 'none'; // img가 덮을 거라 굳이 둘 필요 없음
+
+    const innerImg = document.createElement('img');
+    innerImg.src = r.squareSrc;
+    innerImg.style.cssText = `
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+      border-radius: inherit;
+    `;
+    r.div.appendChild(innerImg);
+
+    tArtRestore.push({
+      div: r.div,
+      origBg: r.origBg,
+      origPosition,
+      innerImg
+    });
+  });
+
+  // 삽입된 img들이 완전히 로드될 때까지 대기
+  await Promise.all(tArtRestore.map(r => new Promise(res => {
+    const img = r.innerImg;
+    if (img.complete && img.naturalWidth) return res();
+    img.onload = res;
+    img.onerror = res;
+    setTimeout(res, 4000);
+  })));
 
   try {
     const canvas = await html2canvas(snapEl, {
       backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff',
-      scale: 2.5,
+      scale: 4,                /* ← 2.5 → 4 : 출력 해상도 60% 향상 */
       useCORS: true,
       allowTaint: false,
       logging: false,
+      imageTimeout: 15000,
       ignoreElements: el =>
         el.id === 'modal-bg' ||
         el.id === 'settings-panel' ||
@@ -1622,13 +1686,15 @@ async function doCapture(e) {
     alert('저장 중 오류가 발생했어요');
   }
 
-  // 복원: 이미지 소스 및 숨겨진 요소 복원
-  origState.forEach(state => {
-    if (state.item.type === 'img') {
-      state.item.el.src = state.src;
-    } else {
-      state.item.el.style.backgroundImage = state.src;
-    }
+  /* 복원 */
+  tArtRestore.forEach(r => {
+    if (r.innerImg) r.innerImg.remove();
+    r.div.style.backgroundImage = r.origBg;
+    r.div.style.position = r.origPosition;
+  });
+  httpTargets.forEach(t => {
+    if (t.type === 'img') t.el.src = t.orig;
+    else t.el.style.backgroundImage = t.orig;
   });
   hide.forEach(el => el.style.visibility = '');
 
