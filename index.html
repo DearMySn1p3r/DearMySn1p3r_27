@@ -1427,7 +1427,7 @@ function onYtInput(val) {
 }
 
 async function fetchYt(url, id) {
-  const thumbUrl = `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+  const previewThumb = `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; // 모달 미리보기용
   const ytLink   = `https://www.youtube.com/watch?v=${id}`;
   let title = '';
 
@@ -1443,11 +1443,24 @@ async function fetchYt(url, id) {
     } catch (_) {}
   }
 
-  let thumbData = thumbUrl;
-  try {
-    const r = await fetch(thumbUrl, { mode: 'cors' });
-    if (r.ok) { const blob = await r.blob(); thumbData = await blobToB64(blob); }
-  } catch (_) {}
+  // ▼▼▼ 고화질 썸네일 우선 시도 (없으면 단계적으로 폴백) ▼▼▼
+  let thumbData = previewThumb;
+  const qualities = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault'];
+  for (const q of qualities) {
+    try {
+      const tUrl = `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+      const r = await fetch(tUrl, { mode: 'cors' });
+      if (r.ok) {
+        const blob = await r.blob();
+        // 유튜브는 해당 화질이 없을 때 ~1-2KB placeholder를 돌려주므로 크기로 필터링
+        if (blob.size > 3000) {
+          thumbData = await blobToB64(blob);
+          break;
+        }
+      }
+    } catch (_) {}
+  }
+  // ▲▲▲ 여기까지 ▲▲▲
 
   let artist = '', displayTitle = title;
   if (title && title.includes(' - ')) {
@@ -1458,7 +1471,7 @@ async function fetchYt(url, id) {
 
   pendingYt = { title: displayTitle || title, artist, thumb: thumbData, link: ytLink };
 
-  $('yt-thumb-el').src = thumbUrl;
+  $('yt-thumb-el').src = previewThumb;
   $('yt-fetched-title').textContent = title || '(제목 없음)';
   $('yt-card').classList.add('show');
   $('yt-title').value = displayTitle || title;
