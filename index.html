@@ -264,6 +264,7 @@ textarea.inp.short{min-height:104px}
 .sh-desc{font-size:12.5px;font-weight:600;color:var(--t2);line-height:1.65;margin:-4px 0 10px}
 #sh-opts{margin-bottom:14px}
 .sh-link{position:relative}
+.sh-link .inp.short{padding-right:13px}
 .sh-link .inp{padding-right:78px;font-size:12.5px;color:var(--t2);text-overflow:ellipsis}
 .sh-link span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:var(--t3)}
 #share .status{margin:10px 0 0}
@@ -368,6 +369,21 @@ textarea.inp.short{min-height:104px}
 .toast{position:fixed;left:50%;bottom:28px;z-index:700;transform:translate(-50%,10px);background:var(--t1);color:#fff;font-size:12.5px;font-weight:700;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100vw - 32px);text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 #yt-host{position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1;overflow:hidden}
+#yt-host:not(.show) iframe{width:200px;height:200px}
+#yt-host.show{left:auto;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:min(300px,calc(100vw - 32px));height:auto;aspect-ratio:16/9;opacity:1;pointer-events:auto;z-index:350;border-radius:14px;background:#000;box-shadow:0 12px 36px rgba(58,34,48,.28);border:2px solid var(--card)}
+#yt-host.show iframe{position:absolute;inset:0;width:100%;height:100%;display:block;border:0}
+#yt-close{display:none;position:absolute;top:-12px;left:-12px;z-index:2;width:26px;height:26px;border-radius:50%;background:var(--card);color:var(--t2);align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+#yt-host.show{overflow:visible}
+#yt-host.show #yt-close{display:flex}
+.np-extra{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--border2)}
+.nx{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t2);flex-shrink:0}
+.nx:hover{background:var(--acc-bg);color:var(--acc-deep)}
+.np-extra .rng{flex:1;min-width:60px;max-width:150px;height:3px}
+.np-extra .rng::-webkit-slider-thumb{width:13px;height:13px}
+.nx-v{font-size:9.5px;font-weight:700;color:var(--t3);min-width:20px;font-variant-numeric:tabular-nums}
+.nx-video{margin-left:auto;height:26px;padding:0 10px;border-radius:9px;border:1px solid var(--border2);background:var(--card);font-size:10.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px;flex-shrink:0;white-space:nowrap}
+.nx-video:hover{border-color:var(--acc);color:var(--acc-deep)}
+.nx-video.on{background:var(--acc-bg);border-color:var(--acc-border);color:var(--acc-ink)}
 
 @media (max-width:480px){
   .wrap{padding:0 12px 44px}
@@ -446,6 +462,12 @@ textarea.inp.short{min-height:104px}
           <div class="track-bar" id="np-bar"><div class="track-fill" id="np-fill"></div></div>
           <span id="np-dur">0:00</span>
         </div>
+        <div class="np-extra no-cap">
+          <button class="nx" id="btn-mute" title="음소거"></button>
+          <input type="range" class="rng" id="np-vol" min="0" max="100" step="1" value="80" title="음량">
+          <span class="nx-v" id="np-vol-v">80</span>
+          <button class="nx-video" id="btn-video" title="영상 보기"></button>
+        </div>
       </section>
 
       <section class="lyr" id="lyr">
@@ -513,7 +535,7 @@ textarea.inp.short{min-height:104px}
 
 <div class="menu" id="menu"></div>
 <div class="toast" id="toast"></div>
-<div id="yt-host"><div id="yt-player"></div></div>
+<div id="yt-host"><div id="yt-player"></div><button id="yt-close" title="영상 닫기"></button></div>
 
 <script>
 /* gifenc 1.0.3 — MIT License, Copyright (c) 2017 Matt DesLauriers */
@@ -550,6 +572,9 @@ const P={
   share:'<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/>',
   copy:'<rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
   arrow:'<path d="M12 19V5"/><path d="m6 11 6-6 6 6"/>',
+  vol:'<path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute:'<path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/>',
+  video:'<rect x="2" y="5" width="14" height="14" rx="2.5"/><path d="m16 10 6-3.5v11L16 14"/>',
   film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5M16 4v5"/>'
 };
 const ic=(n,s=16)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${P[n]}</svg>`;
@@ -603,7 +628,7 @@ const DEF={
   tracks:[],sel:null,
   accent:'#f4a4c8',tone:'white',
   show:{names:true,np:true,lyrics:true},nameMode:2,fx:'none',fxArea:'photo',
-  grad:false,accent2:'#b3a3ea',cardBg:'white',shape:'round',filter:'none',border:'line',font:'serif',lyrAlign:'center',view:'list',lyrVer:2,gradAngle:135,filterAmt:100
+  grad:false,accent2:'#b3a3ea',cardBg:'white',shape:'round',filter:'none',border:'line',font:'serif',lyrAlign:'center',view:'list',lyrVer:2,gradAngle:135,filterAmt:100,volume:80,muted:false,video:false
 };
 function normTrack(t,i,n){
   return{id:t.id||uid(),title:t.title||'제목 없음',artist:t.artist||'',link:t.link||'',ytId:parseYtId(t.link||''),
@@ -937,7 +962,7 @@ function openMenu(id,anchor,items){
     items.push('-');items.push(['del','trash','삭제','danger']);
   }
   m.innerHTML=items.map(it=>it==='-'?'<hr>':`<button data-m="${it[0]}" class="${it[3]||''}">${ic(it[1],15)}${it[2]}${it[4]?`<small>${it[4]}</small>`:''}</button>`).join('');
-  m.dataset.id=id||'';m.classList.add('open');
+  m.dataset.id=id||'';m.classList.add('open');R.menuY=scrollY;
   const r=anchor.getBoundingClientRect(),mw=m.offsetWidth,mh=m.offsetHeight;
   let top=r.bottom+6;if(top+mh>innerHeight-8)top=r.top-mh-6;
   m.style.left=clamp(r.right-mw,8,innerWidth-mw-8)+'px';m.style.top=clamp(top,8,innerHeight-mh-8)+'px';
@@ -959,14 +984,14 @@ function bindMenu(){
     if(a==='del')del(id);
   });
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('#menu')&&!e.target.closest('[data-act="more"]')&&!e.target.closest('#btn-save'))closeMenu()});
-  addEventListener('scroll',closeMenu,{passive:true});addEventListener('resize',closeMenu);
+  addEventListener('scroll',()=>{if(Math.abs(scrollY-(R.menuY||0))>40)closeMenu()},{passive:true});addEventListener('resize',closeMenu);
 }
 
 /* ════ PLAYER (YouTube) ════ */
 function loadYT(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=()=>{R.ytFailed=true};document.head.appendChild(s);setTimeout(()=>{if(!R.ytReady)R.ytFailed=true},15000)}
 window.onYouTubeIframeAPIReady=function(){
-  R.yt=new YT.Player('yt-player',{width:'200',height:'200',playerVars:{playsinline:1,rel:0},events:{
-    onReady(){R.ytReady=true;R.ytFailed=false;if(R.pending){const p=R.pending;R.pending=null;R.yt.loadVideoById(p)}},
+  R.yt=new YT.Player('yt-player',{width:'200',height:'200',host:'https://www.youtube-nocookie.com',playerVars:{playsinline:1,rel:0},events:{
+    onReady(){R.ytReady=true;R.ytFailed=false;applyVolume();if(R.pending){const p=R.pending;R.pending=null;R.yt.loadVideoById(p)}},
     onStateChange(e){
       if(e.data===1){R.playing=true;const t=get(R.cur),d=R.yt.getDuration();if(t&&d&&Math.abs((t.dur||0)-d)>1){t.dur=Math.round(d);persist();renderHead()}renderNP();renderList()}
       else if(e.data===2){R.playing=false;renderNP();renderList()}
@@ -1008,7 +1033,23 @@ function tick(){
   $('np-cur').textContent=fmt(c);$('np-dur').textContent=fmt(d);
   $('np-fill').style.width=(d?c/d*100:0)+'%';
 }
+function applyVolume(){
+  const v=clamp(+S.volume||0,0,100);
+  $('np-vol').value=v;$('np-vol').style.setProperty('--p',v+'%');$('np-vol-v').textContent=S.muted?'0':v;
+  $('btn-mute').innerHTML=ic(S.muted||v===0?'mute':'vol',14);$('btn-mute').title=S.muted?'소리 켜기':'음소거';
+  if(R.ytReady){try{R.yt.setVolume(v);S.muted||v===0?R.yt.mute():R.yt.unMute()}catch{}}
+}
+function applyVideo(){
+  $('yt-host').classList.toggle('show',!!S.video);
+  $('btn-video').classList.toggle('on',!!S.video);
+  $('btn-video').innerHTML=ic('video',12)+(S.video?'영상 닫기':'영상 보기');
+}
 function bindPlayer(){
+  $('np-vol').addEventListener('input',e=>{S.volume=+e.target.value;if(S.volume>0)S.muted=false;applyVolume();persistSoon()});
+  $('btn-mute').addEventListener('click',()=>{S.muted=!S.muted;if(!S.muted&&!S.volume)S.volume=50;applyVolume();persist()});
+  $('btn-video').addEventListener('click',()=>{S.video=!S.video;applyVideo();persist()});
+  $('yt-close').innerHTML=ic('close',12);
+  $('yt-close').addEventListener('click',()=>{S.video=false;applyVideo();persist()});
   $('btn-prev').innerHTML=ic('prev',14);$('btn-next').innerHTML=ic('next',14);
   $('btn-play').addEventListener('click',togglePlay);
   $('btn-next').addEventListener('click',()=>step(1));
@@ -1522,10 +1563,10 @@ async function refreshShare(){
     const res=R.viewOnly?{url:location.href,mode:/#s=/.test(location.hash)?'cloud':'link'}:await buildShareUrl($('sh-img').checked,$('sh-ly').checked);
     const url=res.url;
     if(req!==shareT)return;
-    $('sh-url').value=url;$('sh-copy').disabled=false;$('sh-len').textContent=res.mode==='cloud'?'짧은 링크':url.length.toLocaleString()+'자';
+    $('sh-url').value=url;$('sh-copy').disabled=false;$('sh-len').textContent=res.mode==='cloud'?'':url.length.toLocaleString()+'자';$('sh-url').classList.toggle('short',res.mode==='cloud');
     const s=$('sh-status');
     if(location.protocol==='file:'){s.className='status err';s.textContent='지금은 파일로 열려 있어서 이 링크는 다른 사람이 열 수 없어요. 사이트 주소에 올린 뒤 공유해 주세요.'}
-    else if(res.mode==='cloud'){s.className='status ok';s.textContent='짧은 링크가 만들어졌어요.'}
+    else if(res.mode==='cloud'){s.className='status';s.textContent=''}
     else if(R.cloudErr){s.className='status err';s.textContent='짧은 링크 서버에 연결하지 못해서 긴 링크로 만들었어요. 공유 설정을 확인해 주세요.'}
     else if(url.length>12000){s.className='status load';s.textContent='링크가 길어서 일부 메신저에서 잘릴 수 있어요. 사진을 빼면 짧아지고, 공유 설정을 하면 짧은 링크를 쓸 수 있어요.'}
     else{s.className='status';s.textContent=''}
@@ -1574,7 +1615,7 @@ async function normalizeThumbs(){
   }
   if(ch){persist();renderAll()}
 }
-function boot(){applyTheme();showPhoto();renderAll();placeFx()}
+function boot(){applyTheme();showPhoto();renderAll();placeFx();applyVolume();applyVideo()}
 function init(){
   $('btn-save').innerHTML=ic('download',15);$('btn-set').innerHTML=ic('settings',15);
   $('btn-add').innerHTML=ic('plus',12)+'추가';$('btn-mine').innerHTML=ic('plus',12)+'새로 만들기';$('link-ic').innerHTML=ic('heartF',10);
