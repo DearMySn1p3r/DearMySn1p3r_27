@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#fffafd">
-<title>Playlist</title>
+<title>Music Playlist Editor</title>
 <link rel="icon" type="image/png" href="MOMO.png">
 <link rel="apple-touch-icon" href="MOMO.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,12 +43,12 @@ input,textarea{font:inherit;color:inherit}
 
 /* top bar (outside the frame, not captured) */
 .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:22px 2px 14px}
-.bar-label{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--acc-deep);display:flex;align-items:center;gap:7px}
-.bar-label::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--acc)}
-.bar-btns{display:flex;gap:7px}
+.bar-label{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;color:var(--acc-deep);display:flex;align-items:center;gap:7px}
+.bar-label::before{flex-shrink:0;content:'';width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.bar-btns{display:flex;gap:7px;flex-shrink:0}
 .ico-btn{width:36px;height:36px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card);color:var(--t2);display:flex;align-items:center;justify-content:center;transition:.18s}
 .ico-btn:hover{border-color:var(--acc);color:var(--acc-deep);background:var(--acc-bg)}
-.add-btn{height:36px;padding:0 15px;border-radius:12px;background:var(--grad);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px;box-shadow:0 4px 14px rgba(var(--acc-rgb),.32);transition:.18s}
+.add-btn{white-space:nowrap;flex-shrink:0;height:36px;padding:0 15px;border-radius:12px;background:var(--grad);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px;box-shadow:0 4px 14px rgba(var(--acc-rgb),.32);transition:.18s}
 .add-btn:hover{filter:brightness(1.04);transform:translateY(-1px)}
 
 /* ─── FRAME ─── */
@@ -65,9 +65,19 @@ input,textarea{font:inherit;color:inherit}
 .frame.b-none{border-color:transparent}
 .frame.b-thick{border-width:3px;border-color:var(--acc)}
 /* lyrics align */
-.lyr.center .lyr-body{text-align:center}
-.lyr.center .lyr-line{margin-left:auto;margin-right:auto}
-.lyr.center .lyr-tip{text-align:center}
+.lyr{position:relative;margin-top:12px;padding:22px 24px 18px;border-radius:18px;border:1px solid var(--border);background:var(--card)}
+.lyr.center{text-align:center}
+.q-mark{display:block;height:22px;font-family:'DM Serif Display',Georgia,serif;font-size:46px;line-height:1;color:var(--acc);opacity:.75;margin-bottom:6px;overflow:visible}
+.q-text{font-size:15px;font-weight:600;line-height:1.8;color:var(--t1);white-space:pre-line;overflow-wrap:anywhere;word-break:keep-all}
+.q-cite{margin-top:14px;display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;color:var(--t3);min-width:0}
+.lyr.center .q-cite{justify-content:center}
+.q-cite i{flex-shrink:0;width:16px;height:1.5px;background:var(--acc-border);display:block}
+.q-cite span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lyr-edit{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t3)}
+.lyr-edit:hover{background:var(--acc-bg);color:var(--acc-deep)}
+.lyr-empty{padding:4px 0 2px;text-align:center;font-size:12px;font-weight:600;color:var(--t3)}
+.lyr-empty button{margin-top:10px;height:30px;padding:0 12px;border-radius:10px;border:1.5px solid var(--border2);font-size:12px;font-weight:700;color:var(--t2)}
+.lyr-empty button:hover{border-color:var(--acc);color:var(--acc-deep);background:var(--acc-bg)}
 .r-artist{display:flex;align-items:center;gap:5px}
 .r-artist>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* grid view */
@@ -166,22 +176,6 @@ input,textarea{font:inherit;color:inherit}
 .track-fill::after{content:'';position:absolute;right:-5px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:#fff;border:2px solid var(--acc-deep)}
 
 /* lyrics */
-.lyr{margin-top:12px;padding:16px 16px 14px;border-radius:18px;border:1px solid var(--border);background:var(--card)}
-.lyr-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.lyr-head .np-label{flex-shrink:0}
-.lyr-song{flex:1;min-width:0;font-size:11px;font-weight:600;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lyr-edit{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t3)}
-.lyr-edit:hover{background:var(--acc-bg);color:var(--acc-deep)}
-.lyr-body{max-height:240px;overflow-y:auto;overscroll-behavior:contain;padding-right:2px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-.capturing .lyr-body{max-height:none;overflow:visible}
-.lyr-line{display:block;width:fit-content;max-width:100%;font-size:13.5px;font-weight:500;line-height:1.75;color:var(--t2);padding:0 6px;margin:0 -6px;border-radius:6px;cursor:pointer;overflow-wrap:anywhere;word-break:keep-all;transition:background .15s,color .15s}
-.lyr-line:hover{background:var(--bg2)}
-.lyr-line.hl{background:var(--acc-light);color:var(--acc-ink);font-weight:700}
-.lyr-gap{height:12px}
-.lyr-empty{padding:14px 0 6px;text-align:center;font-size:12px;font-weight:600;color:var(--t3)}
-.lyr-empty button{margin-top:10px;height:30px;padding:0 12px;border-radius:10px;border:1.5px solid var(--border2);font-size:12px;font-weight:700;color:var(--t2)}
-.lyr-empty button:hover{border-color:var(--acc);color:var(--acc-deep);background:var(--acc-bg)}
-.lyr-tip{font-size:10.5px;font-weight:600;color:var(--t3);margin-top:8px}
 
 /* tracks */
 .divider{display:flex;align-items:center;gap:10px;margin:22px 0 8px}
@@ -244,6 +238,8 @@ input,textarea{font:inherit;color:inherit}
 .inp:focus{border-color:var(--acc);background:var(--card);box-shadow:0 0 0 3px var(--acc-light)}
 .inp::placeholder{color:var(--t3)}
 textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
+textarea.inp.short{min-height:104px}
+.fg>label .cnt{float:right;font-weight:600;letter-spacing:0;color:var(--t3)}
 .f-row{display:flex;gap:12px}
 .f-row .grow{flex:1;min-width:0}
 .thumb{position:relative;width:96px;height:96px;flex-shrink:0;border-radius:14px;border:1.5px dashed var(--border2);background:var(--bg2);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--acc-deep);font-size:10.5px;font-weight:700;cursor:pointer;margin-top:19px}
@@ -263,6 +259,28 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
 .btn-ghost:hover{background:var(--bg2)}
 .btn-pri{height:42px;padding:0 18px;border-radius:12px;background:var(--grad);color:#fff;font-size:13px;font-weight:800;box-shadow:0 3px 10px rgba(var(--acc-rgb),.32)}
 .btn-pri:hover{filter:brightness(1.04)}
+
+/* ─── SHARE / VIEW MODE ─── */
+.sh-desc{font-size:12.5px;font-weight:600;color:var(--t2);line-height:1.65;margin:-4px 0 10px}
+#sh-opts{margin-bottom:14px}
+.sh-link{position:relative}
+.sh-link .inp{padding-right:78px;font-size:12.5px;color:var(--t2);text-overflow:ellipsis}
+.sh-link span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:var(--t3)}
+#share .status{margin:10px 0 0}
+.vo{display:none!important}
+.view-only .vo{display:flex!important}
+.view-note{display:none}
+.view-only .view-note{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:10px 12px 10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--t2);line-height:1.5}
+.view-note button{flex-shrink:0;height:30px;padding:0 11px;border-radius:9px;border:1px solid var(--border2);font-size:11.5px;font-weight:700;color:var(--acc-ink);background:var(--acc-bg);white-space:nowrap}
+.view-only #btn-add,.view-only #btn-set,.view-only .r-more,.view-only .lyr-edit,.view-only .pair-ctrl,.view-only .lyr.no-cap{display:none!important}
+.view-only .editable{cursor:default}
+.view-only .editable:hover,.view-only .editable:focus{background:none}
+.view-only .editable:empty{display:none}
+.view-only .r-fav{pointer-events:none}
+.view-only .r-fav:not(.on){display:none}
+.view-only .pair,.view-only .pair.has-img{cursor:default}
+.view-only .pair:not(.has-img) .pair-ph{display:none}
+@media (max-width:480px){.view-only .view-note{flex-direction:column;align-items:stretch;text-align:center}}
 
 /* ─── SETTINGS PANEL ─── */
 .set-bg{display:none;position:fixed;inset:0;z-index:400;background:rgba(58,34,48,.16)}
@@ -343,6 +361,7 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
 
 @media (max-width:480px){
   .wrap{padding:0 12px 44px}
+  .bar-label{letter-spacing:.1em;font-size:9.5px}
   .frame{padding:22px 16px 18px;border-radius:24px}
   #pname{font-size:25px}
   .row{grid-template-columns:18px 42px minmax(0,1fr) auto auto;gap:9px;padding:6px 4px}
@@ -353,6 +372,12 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
   .nb{width:28px;height:28px}
   .nb.main{width:36px;height:36px}
 }
+@media (max-width:350px){
+  .bar-label{letter-spacing:.03em;font-size:9px;gap:5px}
+  .bar-btns{gap:5px}
+  .ico-btn{width:34px;height:34px}
+  .add-btn{padding:0 11px}
+}
 </style>
 </head>
 <body>
@@ -360,14 +385,17 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
 
 <div class="wrap">
   <header class="bar">
-    <span class="bar-label">playlist</span>
+    <span class="bar-label">Music Playlist Editor</span>
     <div class="bar-btns">
+      <button class="ico-btn" id="btn-share" title="공유"></button>
       <button class="ico-btn" id="btn-save" title="이미지 저장"></button>
+      <button class="add-btn vo" id="btn-mine">새로 만들기</button>
       <button class="ico-btn" id="btn-set" title="설정"></button>
       <button class="add-btn" id="btn-add"></button>
     </div>
   </header>
 
+  <div class="view-note" id="view-note">공유받은 플레이리스트예요. 곡을 누르면 바로 들을 수 있어요.<button id="btn-take">내 편집기로 가져오기</button></div>
   <div id="snap">
     <article class="frame" id="frame">
       <div class="f-label">playlist</div>
@@ -415,12 +443,8 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
       </section>
 
       <section class="lyr" id="lyr">
-        <div class="lyr-head">
-          <span class="np-label">lyrics</span>
-          <span class="lyr-song" id="lyr-song"></span>
-          <button class="lyr-edit no-cap" id="lyr-edit" title="가사 편집"></button>
-        </div>
-        <div class="lyr-body" id="lyr-body"></div>
+        <button class="lyr-edit no-cap" id="lyr-edit" title="가사 구절 편집"></button>
+        <div id="lyr-body"></div>
       </section>
 
       <div class="divider"><i></i><span>tracks</span><i></i></div>
@@ -451,8 +475,24 @@ textarea.inp{resize:vertical;min-height:140px;line-height:1.7}
       </div>
     </div>
     <div class="fg"><label>이미지 링크 <em>(선택)</em></label><input class="inp" id="f-img" type="url" placeholder="https://..."></div>
-    <div class="fg" style="margin-bottom:0"><label>가사 <em>(선택)</em></label><textarea class="inp" id="f-lyrics" placeholder="가사를 붙여 넣으세요"></textarea></div>
+    <div class="fg" style="margin-bottom:0"><label>가사 구절 <em>(선택 · 좋아하는 부분만)</em><span class="cnt" id="f-cnt">0/200</span></label><textarea class="inp short" id="f-lyrics" maxlength="200" rows="4" placeholder="기억에 남는 구절을 짧게 적어 주세요"></textarea></div>
     <div class="m-foot"><button class="btn-ghost" data-close="modal">취소</button><button class="btn-pri" id="f-submit">추가하기</button></div>
+  </div>
+</div>
+
+<!-- Share -->
+<div class="modal-bg" id="share">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="grip"></div>
+    <div class="m-top"><h2>플레이리스트 공유</h2><button class="m-x" id="sh-x" title="닫기"></button></div>
+    <p class="sh-desc" id="sh-desc">링크를 받은 사람은 이 플레이리스트를 그대로 보고, 유튜브 링크가 있는 곡을 바로 들을 수 있어요. 받은 사람은 내용을 바꿀 수 없어요.</p>
+    <div id="sh-opts">
+      <label class="tg">사진과 앨범 커버 포함<input type="checkbox" id="sh-img" checked><span class="sw2"></span></label>
+      <label class="tg">가사 구절 포함<input type="checkbox" id="sh-ly" checked><span class="sw2"></span></label>
+    </div>
+    <div class="sh-link"><input class="inp" id="sh-url" readonly><span id="sh-len"></span></div>
+    <div class="status" id="sh-status"></div>
+    <div class="m-foot"><button class="btn-ghost" id="sh-open">미리 보기</button><button class="btn-ghost" id="sh-native">공유하기</button><button class="btn-pri" id="sh-copy">링크 복사</button></div>
   </div>
 </div>
 
@@ -496,6 +536,8 @@ const P={
   link:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
   close:'<path d="M18 6 6 18M6 6l12 12"/>',
   lyrics:'<path d="M4 6h11M4 11h11M4 16h7"/><path d="M20 8v9"/><circle cx="18" cy="17.5" r="2"/>',
+  share:'<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
   film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5M16 4v5"/>'
 };
 const ic=(n,s=16)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24">${P[n]}</svg>`;
@@ -549,7 +591,7 @@ const DEF={
   tracks:[],sel:null,
   accent:'#f4a4c8',tone:'white',
   show:{names:true,np:true,lyrics:true},nameMode:2,fx:'none',fxArea:'photo',
-  grad:false,accent2:'#b3a3ea',cardBg:'white',shape:'round',filter:'none',border:'line',font:'serif',lyrAlign:'left',view:'list'
+  grad:false,accent2:'#b3a3ea',cardBg:'white',shape:'round',filter:'none',border:'line',font:'serif',lyrAlign:'center',view:'list',lyrVer:2
 };
 function normTrack(t,i,n){
   return{id:t.id||uid(),title:t.title||'제목 없음',artist:t.artist||'',link:t.link||'',ytId:parseYtId(t.link||''),
@@ -558,7 +600,7 @@ function normTrack(t,i,n){
 function load(){
   const g=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
   const s=g(KEY);
-  if(s&&Array.isArray(s.tracks)){const o={...DEF,...s,show:{...DEF.show,...(s.show||{})},names:Array.isArray(s.names)?[s.names[0]||'',s.names[1]||'']:['',''],photoPos:{...DEF.photoPos,...(s.photoPos||{})}};o.tracks=s.tracks.map((t,i)=>normTrack(t,i,s.tracks.length));if(s.nameMode===undefined&&o.show.names===false)o.nameMode=0;return o}
+  if(s&&Array.isArray(s.tracks)){const o={...DEF,...s,show:{...DEF.show,...(s.show||{})},names:Array.isArray(s.names)?[s.names[0]||'',s.names[1]||'']:['',''],photoPos:{...DEF.photoPos,...(s.photoPos||{})}};o.tracks=s.tracks.map((t,i)=>normTrack(t,i,s.tracks.length));if(s.lyrVer!==2){o.lyrAlign='center';o.lyrVer=2}if(s.nameMode===undefined&&o.show.names===false)o.nameMode=0;return o}
   const st=JSON.parse(JSON.stringify(DEF));
   const v2=g('playlist_v2');
   if(v2&&Array.isArray(v2.tracks)){
@@ -578,10 +620,10 @@ function load(){
 }
 let S=load();
 let saveT;
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('저장 공간이 부족해요. 사진이나 곡 이미지를 줄여 주세요')}}
+function persist(){if(R.viewOnly)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('저장 공간이 부족해요. 사진이나 곡 이미지를 줄여 주세요')}}
 function persistSoon(){clearTimeout(saveT);saveT=setTimeout(persist,300)}
 
-const R={setTab:'color',photoReq:0,ytFailed:false,menuFor:'',filtered:{key:'',url:''},cur:null,playing:false,yt:null,ytReady:false,pending:null,editId:null,thumb:'',thumbSrc:'none',lastAuto:{title:'',artist:''},req:0,dragId:null,busy:false};
+const R={viewOnly:false,setTab:'color',photoReq:0,ytFailed:false,menuFor:'',filtered:{key:'',url:''},cur:null,playing:false,yt:null,ytReady:false,pending:null,editId:null,thumb:'',thumbSrc:'none',lastAuto:{title:'',artist:''},req:0,dragId:null,busy:false};
 const get=id=>S.tracks.find(t=>t.id===id);
 const idx=id=>S.tracks.findIndex(t=>t.id===id);
 const shown=()=>get(R.cur)||get(S.sel)||S.tracks[0]||null;
@@ -644,9 +686,9 @@ function renderSettings(){
     h+=`<div class="sb"><h3>카드 테두리</h3>${seg('border',[['line','기본'],['double','이중'],['dashed','점선'],['thick','굵게'],['none','없음']],5)}</div>`;
     h+=`<div class="sb"><h3>제목 글꼴</h3><div class="font-grid">${FONTS.map(([k,n,ff,w])=>`<button class="${S.font===k?'on':''}" data-set="font" data-v="${k}"><b style="font-family:${ff.replace(/"/g,"'")};font-weight:${w}">Playlist 가나</b><span>${n}</span></button>`).join('')}</div></div>`;
     h+=`<div class="sb"><h3>페어 이름</h3>${seg('nameMode',[[0,'숨김'],[1,'1명'],[2,'2명']],3,true)}</div>`;
-    h+=`<div class="sb"><h3>가사 정렬</h3>${seg('lyrAlign',[['left','왼쪽'],['center','가운데']],2)}</div>`;
+    h+=`<div class="sb"><h3>가사 구절 정렬</h3>${seg('lyrAlign',[['left','왼쪽'],['center','가운데']],2)}</div>`;
     h+=`<div class="sb"><h3>트랙 보기</h3>${seg('view',[['list','목록'],['grid','앨범 격자']],2)}</div>`;
-    h+=`<div class="sb" style="margin-bottom:0"><h3>표시 항목</h3>${[['np','재생 카드'],['lyrics','가사']].map(([k,n])=>`<label class="tg">${n}<input type="checkbox" data-show="${k}"${S.show[k]?' checked':''}><span class="sw2"></span></label>`).join('')}</div>`;
+    h+=`<div class="sb" style="margin-bottom:0"><h3>표시 항목</h3>${[['np','재생 카드'],['lyrics','가사 구절']].map(([k,n])=>`<label class="tg">${n}<input type="checkbox" data-show="${k}"${S.show[k]?' checked':''}><span class="sw2"></span></label>`).join('')}</div>`;
     if(S.photo&&!R.filterThumbs)makeFilterThumbs();
   }else if(R.setTab==='fx'){
     h+=`<div class="sb"><h3>움직이는 효과</h3><div class="pick-grid c3">${FX.map(([k,n])=>`<button class="${S.fx===k?'on':''}" data-set="fx" data-v="${k}"><canvas data-prev="${k}" width="160" height="80"></canvas>${n}</button>`).join('')}</div></div>`;
@@ -710,7 +752,6 @@ function renderHead(){
   if(a!==$('pdesc'))$('pdesc').textContent=S.desc;
   if(a!==$('name-a'))$('name-a').textContent=S.names[0];
   if(a!==$('name-b'))$('name-b').textContent=S.names[1];
-  document.title=S.name||'Playlist';
   $('names').classList.toggle('hide',S.nameMode===0);
   $('names').classList.toggle('one',S.nameMode===1);
   $('np').classList.toggle('hide',!S.show.np||!S.tracks.length);
@@ -747,7 +788,7 @@ async function showPhoto(){
 function bindPhoto(){
   const box=$('pair');
   $('ph-icon').innerHTML=ic('heart',21);
-  box.addEventListener('click',e=>{if(!S.photo&&!e.target.closest('.pair-ctrl'))$('pair-file').click()});
+  box.addEventListener('click',e=>{if(R.viewOnly)return;if(!S.photo&&!e.target.closest('.pair-ctrl'))$('pair-file').click()});
   $('pair-file').addEventListener('change',async e=>{
     const f=e.target.files[0];e.target.value='';if(!f)return;
     S.photo=await downscale(await readFile(f),1800);S.photoPos={cx:.5,cy:.5,z:1};R.filterThumbs=null;persist();showPhoto();
@@ -766,7 +807,7 @@ function bindPhoto(){
   const start=()=>{const p=[...pt.values()];
     if(p.length===1){pan={x:p[0].x,y:p[0].y,cx:S.photoPos.cx,cy:S.photoPos.cy,...pm};pinch=null}
     else if(p.length>=2){pinch={d:d(p[0],p[1])||1,z:S.photoPos.z};pan=null}};
-  box.addEventListener('pointerdown',e=>{if(!S.photo||e.target.closest('.pair-ctrl'))return;box.setPointerCapture(e.pointerId);pt.set(e.pointerId,{x:e.clientX,y:e.clientY});box.classList.add('grabbing');start()});
+  box.addEventListener('pointerdown',e=>{if(R.viewOnly||!S.photo||e.target.closest('.pair-ctrl'))return;box.setPointerCapture(e.pointerId);pt.set(e.pointerId,{x:e.clientX,y:e.clientY});box.classList.add('grabbing');start()});
   box.addEventListener('pointermove',e=>{
     if(!pt.has(e.pointerId))return;pt.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const p=[...pt.values()];
@@ -775,12 +816,13 @@ function bindPhoto(){
   });
   const end=e=>{if(!pt.delete(e.pointerId))return;if(pt.size)start();else{pan=pinch=null;box.classList.remove('grabbing');persistSoon()}};
   box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
-  box.addEventListener('wheel',e=>{if(!S.photo||!(e.ctrlKey||e.metaKey))return;e.preventDefault();S.photoPos.z*=e.deltaY<0?1.07:1/1.07;layoutPhoto();persistSoon()},{passive:false});
+  box.addEventListener('wheel',e=>{if(R.viewOnly||!S.photo||!(e.ctrlKey||e.metaKey))return;e.preventDefault();S.photoPos.z*=e.deltaY<0?1.07:1/1.07;layoutPhoto();persistSoon()},{passive:false});
   new ResizeObserver(()=>{layoutShape();layoutPhoto()}).observe(box);
 }
 
 /* ════ NOW PLAYING + LYRICS ════ */
-function artHTML(t,s){return t&&t.thumb?`<img src="${esc(t.thumb)}" alt="" draggable="false">`:ic('music',s)}
+function artHTML(t,s){return t&&t.thumb?`<img src="${esc(t.thumb)}" alt="" draggable="false" onerror="artErr(this,${s})">`:ic('music',s)}
+window.artErr=(el,s)=>{const w=document.createElement('span');w.innerHTML=ic('music',s||17);el.replaceWith(w.firstChild)};
 function renderNP(){
   const t=shown();
   $('np').classList.toggle('is-playing',R.playing);
@@ -795,27 +837,20 @@ function renderNP(){
 }
 function renderLyrics(){
   const t=shown();if(!t)return;
-  $('lyr-song').textContent=t.title+(t.artist?' · '+t.artist:'');
-  const body=$('lyr-body');
-  if(!t.lyrics.trim()){
-    body.innerHTML=`<div class="lyr-empty">등록된 가사가 없어요<br><button class="no-cap" data-ly="edit">가사 입력</button></div>`;
-    $('lyr').classList.toggle('no-cap',true);
+  const body=$('lyr-body'),q=(t.lyrics||'').replace(/\r/g,'').replace(/\n{3,}/g,'\n\n').trim();
+  if(!q){
+    body.innerHTML=`<div class="lyr-empty">좋아하는 가사 구절을 넣어 보세요<br><button class="no-cap" data-ly="edit">구절 입력</button></div>`;
+    $('lyr').classList.add('no-cap');
     return;
   }
   $('lyr').classList.remove('no-cap');
-  const hl=new Set(t.hl);
-  body.innerHTML=t.lyrics.split('\n').map((l,i)=>l.trim()?`<span class="lyr-line${hl.has(i)?' hl':''}" data-i="${i}">${esc(l)}</span>`:'<div class="lyr-gap"></div>').join('')
-    +`<p class="lyr-tip no-cap">줄을 누르면 강조 표시돼요</p>`;
+  body.innerHTML=`<span class="q-mark">“</span><div class="q-text">${esc(q)}</div><div class="q-cite"><i></i><span>${esc(t.title)}${t.artist?' · '+esc(t.artist):''}</span></div>`;
 }
 function bindLyrics(){
   $('lyr-edit').innerHTML=ic('edit',14);
-  $('lyr-edit').addEventListener('click',()=>{const t=shown();if(t)openModal(t.id,true)});
+  $('lyr-edit').addEventListener('click',()=>{const t=shown();if(t&&!R.viewOnly)openModal(t.id,true)});
   $('lyr-body').addEventListener('click',e=>{
-    if(e.target.closest('[data-ly]')){const t=shown();if(t)openModal(t.id,true);return}
-    const ln=e.target.closest('.lyr-line');if(!ln)return;
-    const t=shown(),i=+ln.dataset.i;
-    t.hl=t.hl.includes(i)?t.hl.filter(x=>x!==i):[...t.hl,i];
-    ln.classList.toggle('hl');persist();
+    if(e.target.closest('[data-ly]')&&!R.viewOnly){const t=shown();if(t)openModal(t.id,true)}
   });
 }
 
@@ -827,7 +862,7 @@ function renderList(){
     return;
   }
   const sh=shown();
-  L.innerHTML=S.tracks.map((t,i)=>`<div class="row${sh&&t.id===sh.id?' sel':''}${t.id===R.cur?' cur':''}" data-id="${t.id}" draggable="true">
+  L.innerHTML=S.tracks.map((t,i)=>`<div class="row${sh&&t.id===sh.id?' sel':''}${t.id===R.cur?' cur':''}" data-id="${t.id}" draggable="${R.viewOnly?'false':'true'}">
     <div class="r-num"><span class="n">${i+1}</span><span class="pl" data-act="play">${ic(t.id===R.cur&&R.playing?'pause':'play',13)}</span></div>
     <div class="r-art">${artHTML(t,17)}</div>
     <div style="min-width:0"><div class="r-title">${esc(t.title)}</div><div class="r-artist"><span>${esc(t.artist||'아티스트')}</span></div></div>
@@ -842,7 +877,7 @@ function bindList(){
   L.addEventListener('click',e=>{
     const row=e.target.closest('.row');if(!row)return;
     const id=row.dataset.id,act=e.target.closest('[data-act]');
-    if(act&&act.dataset.act==='fav'){const t=get(id);t.fav=!t.fav;persist();renderList();return}
+    if(act&&act.dataset.act==='fav'){if(R.viewOnly)return;const t=get(id);t.fav=!t.fav;persist();renderList();return}
     if(act&&act.dataset.act==='more'){openMenu(id,act);return}
     if(act&&act.dataset.act==='play'){id===R.cur?togglePlay():playTrack(id);return}
     const t=get(id),sh=shown();
@@ -853,7 +888,7 @@ function bindList(){
     select(id);
   });
   L.addEventListener('dblclick',e=>{const row=e.target.closest('.row');if(row&&!e.target.closest('[data-act]'))playTrack(row.dataset.id)});
-  L.addEventListener('dragstart',e=>{const row=e.target.closest('.row');if(!row)return;R.dragId=row.dataset.id;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',R.dragId)}catch{}});
+  L.addEventListener('dragstart',e=>{const row=e.target.closest('.row');if(!row||R.viewOnly){e.preventDefault();return}R.dragId=row.dataset.id;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',R.dragId)}catch{}});
   const clear=()=>L.querySelectorAll('.drop-above,.drop-below').forEach(r=>r.classList.remove('drop-above','drop-below'));
   L.addEventListener('dragover',e=>{if(!R.dragId)return;const row=e.target.closest('.row');if(!row)return;e.preventDefault();clear();if(row.dataset.id===R.dragId)return;const r=row.getBoundingClientRect(),before=S.view==='grid'?e.clientX<r.left+r.width/2:e.clientY<r.top+r.height/2;row.classList.add(before?'drop-above':'drop-below')});
   L.addEventListener('drop',e=>{
@@ -879,7 +914,7 @@ function openMenu(id,anchor,items){
   if(!items){
     const t=get(id),i=idx(id);items=[];
     items.push(['play',R.cur===id&&R.playing?'pause':'play',R.cur===id&&R.playing?'일시정지':'재생']);
-    items.push(['lyrics','lyrics','가사 편집']);
+    items.push(['lyrics','lyrics','가사 구절']);
     items.push(['edit','edit','수정']);
     if(safeUrl(t.link))items.push(['link','link','링크 열기']);
     if(i>0)items.push(['up','up','위로']);
@@ -974,10 +1009,11 @@ function bindPlayer(){
 function setStatus(m,c){const s=$('f-status');s.textContent=m;s.className='status'+(c?' '+c:'')}
 function setThumb(){const b=$('thumb');b.classList.toggle('has',!!R.thumb);if(R.thumb)$('thumb-img').src=R.thumb;else $('thumb-img').removeAttribute('src')}
 function openModal(id,focusLyrics){
+  if(R.viewOnly)return;
   closeMenu();R.editId=id||null;const t=id?get(id):null;
   $('m-title').textContent=t?'트랙 수정':'트랙 추가';$('f-submit').textContent=t?'저장':'추가하기';
   $('f-link').value=t?t.link:'';$('f-title').value=t?t.title:'';$('f-artist').value=t?t.artist:'';
-  $('f-img').value=t&&/^https?:/.test(t.thumb)?t.thumb:'';$('f-lyrics').value=t?t.lyrics:'';
+  $('f-img').value=t&&/^https?:/.test(t.thumb)?t.thumb:'';$('f-lyrics').value=t?t.lyrics:'';$('f-cnt').textContent=$('f-lyrics').value.length+'/200';
   R.thumb=t?t.thumb:'';R.thumbSrc=!t||!t.thumb?'none':(t.ytId?'yt':'user');R.lastAuto={title:'',artist:''};R.req++;
   setStatus('');setThumb();$('modal').classList.add('open');
   setTimeout(()=>(focusLyrics?$('f-lyrics'):t?$('f-title'):$('f-link')).focus(),80);
@@ -1032,6 +1068,7 @@ async function submit(){
 function bindModal(){
   $('f-link').addEventListener('input',onLink);
   $('f-submit').addEventListener('click',submit);
+  $('f-lyrics').addEventListener('input',()=>{$('f-cnt').textContent=$('f-lyrics').value.length+'/200'});
   $('thumb-ic').innerHTML=ic('image',20);$('thumb-x').innerHTML=ic('close',11);
   $('thumb').addEventListener('click',e=>{if(!e.target.closest('#thumb-x'))$('thumb-file').click()});
   $('thumb-x').addEventListener('click',e=>{e.stopPropagation();R.thumb='';R.thumbSrc='user';$('f-img').value='';setThumb()});
@@ -1332,8 +1369,106 @@ async function captureGIF(){
   done();R.busy=false;
 }
 
+/* ════ SHARE ════ */
+const b64u=bytes=>{let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const unb64u=str=>{str=str.replace(/-/g,'+').replace(/_/g,'/');while(str.length%4)str+='=';const s=atob(str),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+async function pipe(bytes,stream){return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer())}
+async function sharePhoto(){
+  const img=$('pair-img'),box=$('pair');
+  if(!S.photo||!img.naturalWidth)return'';
+  const W=box.clientWidth,H=box.clientHeight,nw=img.naturalWidth,nh=img.naturalHeight;
+  const l=parseFloat(img.style.left)||0,tp=parseFloat(img.style.top)||0,dw=parseFloat(img.style.width)||W,dh=parseFloat(img.style.height)||H;
+  const sx=-l/dw*nw,sy=-tp/dh*nh,sw=W/dw*nw,sh=H/dh*nh;
+  for(const [w,q] of [[440,.66],[380,.56],[320,.5]]){
+    const c=document.createElement('canvas');c.width=w;c.height=Math.round(w*H/W);
+    const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+    const d=c.toDataURL('image/jpeg',q);if(d.length<30000||w===320)return d;
+  }
+  return'';
+}
+async function tinyThumb(src){try{const d=await cropSquare(src,72,false);return d?d.replace('image/jpeg;base64,','image/jpeg;base64,'):''}catch{return''}}
+async function buildShareUrl(withImg,withLy){
+  const tr=[];
+  for(const t of S.tracks){
+    let th='';
+    if(!t.ytId&&withImg&&t.thumb)th=/^https?:/.test(t.thumb)?t.thumb:await tinyThumb(t.thumb);
+    tr.push([t.title,t.artist,t.link,withLy?t.lyrics:'',th,t.dur||0,t.fav?1:0]);
+  }
+  const p={v:1,n:S.name,d:S.desc,nm:S.names,m:S.nameMode,r:S.ratio,ac:S.accent,a2:S.accent2,g:S.grad?1:0,t:S.tone,cb:S.cardBg,sh:S.shape,b:S.border,fo:S.font,la:S.lyrAlign,vw:S.view,fx:S.fx,fa:S.fxArea,so:[S.show.np?1:0,S.show.lyrics?1:0],ph:withImg?await sharePhoto():'',tr};
+  let bytes=new TextEncoder().encode(JSON.stringify(p)),tag='j';
+  if(window.CompressionStream){try{bytes=await pipe(bytes,new CompressionStream('deflate-raw'));tag='z'}catch{}}
+  return location.href.split('#')[0]+'#p='+tag+b64u(bytes);
+}
+async function readShare(hash){
+  const m=hash.match(/^#p=([jz])(.+)$/);if(!m)return null;
+  let bytes=unb64u(m[2]);
+  if(m[1]==='z'){if(!window.DecompressionStream)throw new Error('nodecomp');bytes=await pipe(bytes,new DecompressionStream('deflate-raw'))}
+  const p=JSON.parse(new TextDecoder().decode(bytes));
+  if(!p||!Array.isArray(p.tr))throw new Error('bad');
+  const st=JSON.parse(JSON.stringify(DEF));
+  Object.assign(st,{name:p.n||'Playlist',desc:p.d||'',names:Array.isArray(p.nm)?[p.nm[0]||'',p.nm[1]||'']:['',''],nameMode:p.m??2,ratio:p.r||'classic',
+    accent:p.ac||DEF.accent,accent2:p.a2||DEF.accent2,grad:!!p.g,tone:p.t||'white',cardBg:p.cb||'white',shape:p.sh||'round',border:p.b||'line',
+    font:p.fo||'serif',lyrAlign:p.la||'center',view:p.vw||'list',fx:p.fx||'none',fxArea:p.fa||'photo',filter:'none',photo:p.ph||'',
+    show:{names:true,np:!!(p.so?p.so[0]:1),lyrics:!!(p.so?p.so[1]:1)}});
+  st.tracks=p.tr.map((a,i)=>{const t=normTrack({title:a[0],artist:a[1],link:a[2],lyrics:a[3],thumb:a[4],dur:a[5],fav:!!a[6]},i,p.tr.length);
+    if(!t.thumb&&t.ytId)t.thumb=`https://i.ytimg.com/vi/${t.ytId}/mqdefault.jpg`;return t});
+  st.sel=st.tracks[0]?st.tracks[0].id:null;
+  return st;
+}
+function enterView(st){
+  R.viewOnly=true;S=st;
+  document.body.classList.add('view-only');
+  document.querySelectorAll('.editable').forEach(e=>{e.contentEditable='false'});
+}
+let shareT=0;
+async function refreshShare(){
+  const req=++shareT;
+  $('sh-url').value='링크를 만드는 중이에요';$('sh-len').textContent='';
+  try{
+    const url=R.viewOnly?location.href:await buildShareUrl($('sh-img').checked,$('sh-ly').checked);
+    if(req!==shareT)return;
+    $('sh-url').value=url;$('sh-len').textContent=url.length.toLocaleString()+'자';
+    const s=$('sh-status');
+    if(location.protocol==='file:'){s.className='status err';s.textContent='지금은 파일로 열려 있어서 이 링크는 다른 사람이 열 수 없어요. 사이트 주소에 올린 뒤 공유해 주세요.'}
+    else if(url.length>12000){s.className='status load';s.textContent='링크가 길어서 일부 메신저에서 잘릴 수 있어요. 사진을 빼면 짧아져요.'}
+    else{s.className='status';s.textContent=''}
+  }catch(e){console.error(e);$('sh-url').value='';const s=$('sh-status');s.className='status err';s.textContent='링크를 만들지 못했어요'}
+}
+function openShare(){
+  closeMenu();
+  if(!R.viewOnly&&!S.tracks.length){toast('곡을 추가한 뒤 공유해 주세요');return}
+  $('sh-opts').style.display=R.viewOnly?'none':'';
+  $('sh-desc').textContent=R.viewOnly?'받은 링크를 그대로 다른 사람에게 보낼 수 있어요.':'링크를 받은 사람은 이 플레이리스트를 그대로 보고, 유튜브 링크가 있는 곡을 바로 들을 수 있어요. 받은 사람은 내용을 바꿀 수 없어요.';
+  $('sh-native').style.display=navigator.share?'':'none';
+  $('share').classList.add('open');refreshShare();
+}
+async function copyText(s){
+  try{await navigator.clipboard.writeText(s);return true}catch{}
+  try{const i=$('sh-url');i.focus();i.select();i.setSelectionRange(0,s.length);return document.execCommand('copy')}catch{return false}
+}
+function bindShare(){
+  $('btn-share').innerHTML=ic('share',15);$('sh-x').innerHTML=ic('close',14);
+  $('btn-share').addEventListener('click',openShare);
+  $('sh-x').addEventListener('click',()=>$('share').classList.remove('open'));
+  $('share').addEventListener('click',e=>{if(e.target===$('share'))$('share').classList.remove('open')});
+  $('sh-img').addEventListener('change',refreshShare);$('sh-ly').addEventListener('change',refreshShare);
+  $('sh-copy').addEventListener('click',async()=>{const u=$('sh-url').value;if(!/^(https?|file):/.test(u))return;toast(await copyText(u)?'링크를 복사했어요':'복사하지 못했어요. 링크를 길게 눌러 복사해 주세요')});
+  $('sh-native').addEventListener('click',async()=>{const u=$('sh-url').value;if(!/^(https?|file):/.test(u))return;try{await navigator.share({title:S.name,url:u})}catch{}});
+  $('sh-open').addEventListener('click',()=>{const u=$('sh-url').value;if(/^(https?|file):/.test(u))window.open(u,'_blank','noopener')});
+  $('sh-url').addEventListener('focus',e=>e.target.select());
+  $('btn-mine').addEventListener('click',()=>{location.href=location.href.split('#')[0]});
+  $('btn-take').addEventListener('click',()=>{
+    let has=false;try{const o=JSON.parse(localStorage.getItem(KEY));has=o&&o.tracks&&o.tracks.length}catch{}
+    if(has&&!confirm('내 편집기에 있던 플레이리스트가 이 내용으로 바뀌어요. 계속할까요?'))return;
+    try{localStorage.setItem(KEY,JSON.stringify({...S,lyrVer:2}));location.href=location.href.split('#')[0]}
+    catch{toast('저장 공간이 부족해서 가져오지 못했어요')}
+  });
+  addEventListener('hashchange',()=>location.reload());
+}
+
 /* ════ BOOT ════ */
 async function normalizeThumbs(){
+  if(R.viewOnly)return;
   let ch=false;
   for(const t of S.tracks){
     if(!t.thumb)continue;
@@ -1345,13 +1480,13 @@ async function normalizeThumbs(){
 function boot(){applyTheme();showPhoto();renderAll();placeFx()}
 function init(){
   $('btn-save').innerHTML=ic('download',15);$('btn-set').innerHTML=ic('settings',15);
-  $('btn-add').innerHTML=ic('plus',12)+'추가';$('link-ic').innerHTML=ic('heartF',12);
+  $('btn-add').innerHTML=ic('plus',12)+'추가';$('btn-mine').innerHTML=ic('plus',12)+'새로 만들기';$('link-ic').innerHTML=ic('heartF',12);
   document.querySelectorAll('[data-close]').forEach(b=>{if(b.classList.contains('m-x'))b.innerHTML=ic('close',14);b.addEventListener('click',closeModal)});
   bindEditable($('pname'),()=>S.name,v=>S.name=v,'My Playlist');
   bindEditable($('pdesc'),()=>S.desc,v=>S.desc=v,'');
   bindEditable($('name-a'),()=>S.names[0],v=>S.names[0]=v,'');
   bindEditable($('name-b'),()=>S.names[1],v=>S.names[1]=v,'');
-  bindPhoto();bindLyrics();bindList();bindMenu();bindPlayer();bindModal();bindSettings();
+  bindPhoto();bindLyrics();bindList();bindMenu();bindPlayer();bindModal();bindSettings();bindShare();
   $('btn-add').addEventListener('click',()=>openModal());
   $('btn-set').addEventListener('click',openSet);
   $('btn-save').addEventListener('click',e=>{
@@ -1360,12 +1495,16 @@ function init(){
     openMenu(null,e.currentTarget,[['png','image','PNG 저장','','이미지'],['gif','film','GIF 저장','',S.fx==='none'?'움직이는 이미지':'효과: '+FX.find(f=>f[0]===S.fx)[1]]]);
   });
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){closeMenu();closeModal();closeSet();return}
+    if(e.key==='Escape'){closeMenu();closeModal();closeSet();$('share').classList.remove('open');return}
     const a=document.activeElement;
     if(a&&(a.isContentEditable||/INPUT|TEXTAREA|SELECT|BUTTON/.test(a.tagName)))return;
-    if($('modal').classList.contains('open')||$('set').classList.contains('open'))return;
+    if($('modal').classList.contains('open')||$('set').classList.contains('open')||$('share').classList.contains('open'))return;
     if(e.code==='Space'&&S.tracks.length){e.preventDefault();togglePlay()}
   });
+  if(/^#p=/.test(location.hash)){
+    readShare(location.hash).then(st=>{if(st)enterView(st);boot();loadYT()}).catch(e=>{console.error(e);boot();normalizeThumbs();loadYT();toast(e&&e.message==='nodecomp'?'이 브라우저에서는 공유 링크를 열 수 없어요':'공유 링크가 잘렸거나 올바르지 않아요')});
+    return;
+  }
   boot();normalizeThumbs();loadYT();
 }
 document.addEventListener('DOMContentLoaded',init);
