@@ -522,6 +522,11 @@ textarea.inp.short{min-height:104px}
 <script>
 'use strict';
 
+/* ════ 공유 설정 (선택) ════
+   짧은 공유 링크를 쓰려면 Firebase 프로젝트 정보를 아래에 넣어 주세요.
+   비워 두면 링크 안에 내용을 담는 방식으로 공유돼요. */
+const CLOUD={projectId:'',apiKey:''};
+
 /* ════ ICONS ════ */
 const P={
   play:'<path class="f" d="M8 5.5v13c0 .8.9 1.3 1.6.8l9.6-6.5c.6-.4.6-1.2 0-1.6L9.6 4.7C8.9 4.2 8 4.7 8 5.5z"/>',
@@ -602,7 +607,7 @@ const DEF={
 };
 function normTrack(t,i,n){
   return{id:t.id||uid(),title:t.title||'제목 없음',artist:t.artist||'',link:t.link||'',ytId:parseYtId(t.link||''),
-    thumb:t.thumb||'',lyrics:t.lyrics||'',hl:Array.isArray(t.hl)?t.hl:[],by:t.by||'',fav:!!t.fav,dur:t.dur||0,added:t.added||(Date.now()-((n||0)-(i||0))*1000)};
+    thumb:t.thumb||'',own:t.own,lyrics:t.lyrics||'',hl:Array.isArray(t.hl)?t.hl:[],by:t.by||'',fav:!!t.fav,dur:t.dur||0,added:t.added||(Date.now()-((n||0)-(i||0))*1000)};
 }
 function load(){
   const g=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
@@ -1024,7 +1029,7 @@ function openModal(id,focusLyrics){
   $('m-title').textContent=t?'트랙 수정':'트랙 추가';$('f-submit').textContent=t?'저장':'추가하기';
   $('f-link').value=t?t.link:'';$('f-title').value=t?t.title:'';$('f-artist').value=t?t.artist:'';
   $('f-img').value=t&&/^https?:/.test(t.thumb)?t.thumb:'';$('f-lyrics').value=t?t.lyrics:'';$('f-cnt').textContent=$('f-lyrics').value.length+'/200';
-  R.thumb=t?t.thumb:'';R.thumbSrc=!t||!t.thumb?'none':(t.ytId?'yt':'user');R.lastAuto={title:'',artist:''};R.req++;
+  R.thumb=t?t.thumb:'';R.thumbSrc=!t||!t.thumb?'none':(t.own===false?'yt':'user');R.lastAuto={title:'',artist:''};R.req++;
   setStatus('');setThumb();$('modal').classList.add('open');
   setTimeout(()=>(focusLyrics?$('f-lyrics'):t?$('f-title'):$('f-link')).focus(),80);
 }
@@ -1070,7 +1075,7 @@ async function submit(){
   const iu=$('f-img').value.trim();
   if(iu&&iu!==R.thumb&&safeUrl(iu)){R.submitting=true;$('f-submit').disabled=true;thumb=(await cropSquare(iu,320,false))||iu;$('f-submit').disabled=false;R.submitting=false}
   const old=R.editId?get(R.editId):null,lyrics=$('f-lyrics').value.replace(/\s+$/,'');
-  const t={id:old?old.id:uid(),title,artist:$('f-artist').value.trim(),link,ytId,thumb,lyrics,
+  const t={id:old?old.id:uid(),title,artist:$('f-artist').value.trim(),link,ytId,thumb,own:thumb?R.thumbSrc==='user':undefined,lyrics,
     hl:old&&old.lyrics===lyrics?old.hl:[],by:old?old.by||'':'',fav:old?old.fav:false,dur:old&&old.ytId===ytId?old.dur:0,added:old?old.added:Date.now()};
   if(old)S.tracks[idx(old.id)]=t;else{S.tracks.push(t);if(!S.sel)S.sel=t.id}
   persist();closeModal();renderAll();toast(old?'수정했어요':'추가했어요');
@@ -1386,37 +1391,93 @@ async function captureGIF(){
 const b64u=bytes=>{let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const unb64u=str=>{str=str.replace(/-/g,'+').replace(/_/g,'/');while(str.length%4)str+='=';const s=atob(str),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
 async function pipe(bytes,stream){return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer())}
-async function sharePhoto(){
+const cloudOn=()=>!!(CLOUD.projectId&&CLOUD.apiKey);
+const fsBase=()=>`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(CLOUD.projectId)}/databases/(default)/documents/playlists`;
+let webpOK=null;
+function canWebp(){if(webpOK===null){try{const c=document.createElement('canvas');c.width=c.height=2;webpOK=c.toDataURL('image/webp').startsWith('data:image/webp')}catch{webpOK=false}}return webpOK}
+async function canvasBytes(c,q){
+  const type=canWebp()?'image/webp':'image/jpeg';
+  const blob=await new Promise(r=>c.toBlob(r,type,q));
+  return{bytes:new Uint8Array(await blob.arrayBuffer()),type};
+}
+async function sharePhoto(w,q){
   const img=$('pair-img'),box=$('pair');
-  if(!S.photo||!img.naturalWidth)return'';
+  if(!S.photo||!img.naturalWidth)return null;
   const W=box.clientWidth,H=box.clientHeight,nw=img.naturalWidth,nh=img.naturalHeight;
   const l=parseFloat(img.style.left)||0,tp=parseFloat(img.style.top)||0,dw=parseFloat(img.style.width)||W,dh=parseFloat(img.style.height)||H;
   const sx=-l/dw*nw,sy=-tp/dh*nh,sw=W/dw*nw,sh=H/dh*nh;
-  for(const [w,q] of [[440,.66],[380,.56],[320,.5]]){
-    const c=document.createElement('canvas');c.width=w;c.height=Math.round(w*H/W);
-    const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
-    const d=c.toDataURL('image/jpeg',q);if(d.length<30000||w===320)return d;
-  }
-  return'';
+  const cw=Math.min(w,Math.round(sw));
+  const c=document.createElement('canvas');c.width=cw;c.height=Math.round(cw*H/W);
+  const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+  return canvasBytes(c,q);
 }
-async function tinyThumb(src){try{const d=await cropSquare(src,72,false);return d?d.replace('image/jpeg;base64,','image/jpeg;base64,'):''}catch{return''}}
-async function buildShareUrl(withImg,withLy){
+async function shareCover(src,size,q){
+  try{
+    const img=await withTimeout(loadImg(src),8000);const s=Math.min(img.naturalWidth,img.naturalHeight);
+    const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.imageSmoothingQuality='high';
+    x.drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,size,size);
+    return canvasBytes(c,q);
+  }catch{return null}
+}
+/* 공유 데이터: [MP2][json 길이 4바이트][json][이미지들...] 을 압축해서 한 덩어리로 */
+async function packShare(withImg,withLy,prof){
+  const blobs=[],add=b=>{if(!b)return'';blobs.push(b);return blobs.length-1};
   const tr=[];
   for(const t of S.tracks){
     let th='';
-    if(!t.ytId&&withImg&&t.thumb)th=/^https?:/.test(t.thumb)?t.thumb:await tinyThumb(t.thumb);
+    if(withImg&&t.thumb){
+      if(/^https?:/.test(t.thumb))th=t.thumb;
+      else if(prof.allCovers||t.own!==false||!t.ytId)th=add(await shareCover(t.thumb,prof.cover,prof.cq));
+    }
     tr.push([t.title,t.artist,t.link,withLy?t.lyrics:'',th,t.dur||0,t.fav?1:0]);
   }
-  const p={v:1,n:S.name,d:S.desc,nm:S.names,m:S.nameMode,r:S.ratio,ac:S.accent,a2:S.accent2,g:S.grad?1:0,ga:S.gradAngle,t:S.tone,cb:S.cardBg,sh:S.shape,b:S.border,fo:S.font,la:S.lyrAlign,vw:S.view,fx:S.fx,fa:S.fxArea,so:[S.show.np?1:0,S.show.lyrics?1:0],ph:withImg?await sharePhoto():'',tr};
-  let bytes=new TextEncoder().encode(JSON.stringify(p)),tag='j';
-  if(window.CompressionStream){try{bytes=await pipe(bytes,new CompressionStream('deflate-raw'));tag='z'}catch{}}
-  return location.href.split('#')[0]+'#p='+tag+b64u(bytes);
+  const ph=withImg?add(await sharePhoto(prof.photo,prof.pq)):'';
+  const p={v:2,n:S.name,d:S.desc,nm:S.names,m:S.nameMode,r:S.ratio,ac:S.accent,a2:S.accent2,g:S.grad?1:0,ga:S.gradAngle,t:S.tone,cb:S.cardBg,sh:S.shape,b:S.border,fo:S.font,la:S.lyrAlign,vw:S.view,fx:S.fx,fa:S.fxArea,so:[S.show.np?1:0,S.show.lyrics?1:0],ph,tr,
+    bt:blobs.map(b=>b.type==='image/webp'?'w':'j')};
+  const js=new TextEncoder().encode(JSON.stringify(p));
+  let total=3+4+js.length;for(const b of blobs)total+=4+b.bytes.length;
+  const out=new Uint8Array(total),dv=new DataView(out.buffer);let o=0;
+  out.set([77,80,50],0);o=3;dv.setUint32(o,js.length);o+=4;out.set(js,o);o+=js.length;
+  for(const b of blobs){dv.setUint32(o,b.bytes.length);o+=4;out.set(b.bytes,o);o+=b.bytes.length}
+  let bytes=out,tag='j';
+  if(window.CompressionStream){try{bytes=await pipe(out,new CompressionStream('deflate-raw'));tag='z'}catch{}}
+  return tag+b64u(bytes);
 }
-async function readShare(hash){
-  const m=hash.match(/^#p=([jz])(.+)$/);if(!m)return null;
-  let bytes=unb64u(m[2]);
-  if(m[1]==='z'){if(!window.DecompressionStream)throw new Error('nodecomp');bytes=await pipe(bytes,new DecompressionStream('deflate-raw'))}
-  const p=JSON.parse(new TextDecoder().decode(bytes));
+const LINK_PROFILES=[{photo:560,pq:.72,cover:88,cq:.72},{photo:460,pq:.64,cover:72,cq:.66},{photo:380,pq:.56,cover:64,cq:.6}];
+const CLOUD_PROFILE={photo:960,pq:.84,cover:180,cq:.82,allCovers:true};
+async function buildShareUrl(withImg,withLy){
+  const base=location.href.split('#')[0];
+  if(cloudOn()){
+    try{
+      const data=await packShare(withImg,withLy,CLOUD_PROFILE);
+      R.cloudCache=R.cloudCache||{};
+      if(R.cloudCache[data])return{url:base+'#s='+R.cloudCache[data],mode:'cloud'};
+      const r=await fetch(`${fsBase()}?key=${encodeURIComponent(CLOUD.apiKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fields:{d:{stringValue:data},t:{timestampValue:new Date().toISOString()}}}),signal:tSignal(15000)});
+      if(!r.ok)throw new Error('cloud '+r.status);
+      const j=await r.json(),id=(j.name||'').split('/').pop();
+      if(!id)throw new Error('noid');
+      R.cloudCache[data]=id;
+      return{url:base+'#s='+id,mode:'cloud'};
+    }catch(e){console.error(e);R.cloudErr=true}
+  }
+  let data='';
+  for(const prof of LINK_PROFILES){data=await packShare(withImg,withLy,prof);if(data.length<42000)break}
+  return{url:base+'#m='+data,mode:'link'};
+}
+async function unpackShare(str){
+  const tag=str[0];let bytes=unb64u(str.slice(1));
+  if(tag==='z'){if(!window.DecompressionStream)throw new Error('nodecomp');bytes=await pipe(bytes,new DecompressionStream('deflate-raw'))}
+  if(bytes[0]!==77||bytes[1]!==80||bytes[2]!==50)throw new Error('bad');
+  const dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let o=3;
+  const jl=dv.getUint32(o);o+=4;const p=JSON.parse(new TextDecoder().decode(bytes.subarray(o,o+jl)));o+=jl;
+  const urls=[];
+  for(let i=0;o<bytes.length;i++){const l=dv.getUint32(o);o+=4;const type=(p.bt||[])[i]==='w'?'image/webp':'image/jpeg';urls.push(await blobToB64(new Blob([bytes.subarray(o,o+l)],{type})));o+=l}
+  const img=v=>typeof v==='number'?(urls[v]||''):(v||'');
+  p.ph=img(p.ph);p.tr.forEach(a=>{a[4]=img(a[4])});
+  return p;
+}
+function shareToState(p){
   if(!p||!Array.isArray(p.tr))throw new Error('bad');
   const st=JSON.parse(JSON.stringify(DEF));
   Object.assign(st,{name:p.n||'Playlist',desc:p.d||'',names:Array.isArray(p.nm)?[p.nm[0]||'',p.nm[1]||'']:['',''],nameMode:p.m??2,ratio:p.r||'classic',
@@ -1428,6 +1489,25 @@ async function readShare(hash){
   st.sel=st.tracks[0]?st.tracks[0].id:null;
   return st;
 }
+async function readShare(hash){
+  let m;
+  if(m=hash.match(/^#s=([\w-]{6,})$/)){
+    if(!cloudOn())throw new Error('nocloud');
+    const r=await fetch(`${fsBase()}/${m[1]}?key=${encodeURIComponent(CLOUD.apiKey)}`,{signal:tSignal(15000)});
+    if(r.status===404)throw new Error('gone');
+    if(!r.ok)throw new Error('cloud');
+    const j=await r.json(),d=j.fields&&j.fields.d&&j.fields.d.stringValue;
+    if(!d)throw new Error('bad');
+    return shareToState(await unpackShare(d));
+  }
+  if(m=hash.match(/^#m=([jz][\w-]+)$/))return shareToState(await unpackShare(m[1]));
+  if(m=hash.match(/^#p=([jz])(.+)$/)){ // 예전 형식
+    let bytes=unb64u(m[2]);
+    if(m[1]==='z'){if(!window.DecompressionStream)throw new Error('nodecomp');bytes=await pipe(bytes,new DecompressionStream('deflate-raw'))}
+    return shareToState(JSON.parse(new TextDecoder().decode(bytes)));
+  }
+  return null;
+}
 function enterView(st){
   R.viewOnly=true;S=st;
   document.body.classList.add('view-only');
@@ -1436,14 +1516,18 @@ function enterView(st){
 let shareT=0;
 async function refreshShare(){
   const req=++shareT;
-  $('sh-url').value='링크를 만드는 중이에요';$('sh-len').textContent='';
+  $('sh-url').value='링크를 만드는 중이에요';$('sh-copy').disabled=true;$('sh-len').textContent='';
   try{
-    const url=R.viewOnly?location.href:await buildShareUrl($('sh-img').checked,$('sh-ly').checked);
+    R.cloudErr=false;
+    const res=R.viewOnly?{url:location.href,mode:/#s=/.test(location.hash)?'cloud':'link'}:await buildShareUrl($('sh-img').checked,$('sh-ly').checked);
+    const url=res.url;
     if(req!==shareT)return;
-    $('sh-url').value=url;$('sh-len').textContent=url.length.toLocaleString()+'자';
+    $('sh-url').value=url;$('sh-copy').disabled=false;$('sh-len').textContent=res.mode==='cloud'?'짧은 링크':url.length.toLocaleString()+'자';
     const s=$('sh-status');
     if(location.protocol==='file:'){s.className='status err';s.textContent='지금은 파일로 열려 있어서 이 링크는 다른 사람이 열 수 없어요. 사이트 주소에 올린 뒤 공유해 주세요.'}
-    else if(url.length>12000){s.className='status load';s.textContent='링크가 길어서 일부 메신저에서 잘릴 수 있어요. 사진을 빼면 짧아져요.'}
+    else if(res.mode==='cloud'){s.className='status ok';s.textContent='짧은 링크가 만들어졌어요.'}
+    else if(R.cloudErr){s.className='status err';s.textContent='짧은 링크 서버에 연결하지 못해서 긴 링크로 만들었어요. 공유 설정을 확인해 주세요.'}
+    else if(url.length>12000){s.className='status load';s.textContent='링크가 길어서 일부 메신저에서 잘릴 수 있어요. 사진을 빼면 짧아지고, 공유 설정을 하면 짧은 링크를 쓸 수 있어요.'}
     else{s.className='status';s.textContent=''}
   }catch(e){console.error(e);$('sh-url').value='';const s=$('sh-status');s.className='status err';s.textContent='링크를 만들지 못했어요'}
 }
@@ -1514,8 +1598,9 @@ function init(){
     if($('modal').classList.contains('open')||$('set').classList.contains('open')||$('share').classList.contains('open'))return;
     if(e.code==='Space'&&S.tracks.length){e.preventDefault();togglePlay()}
   });
-  if(/^#p=/.test(location.hash)){
-    readShare(location.hash).then(st=>{if(st)enterView(st);boot();loadYT()}).catch(e=>{console.error(e);boot();normalizeThumbs();loadYT();toast(e&&e.message==='nodecomp'?'이 브라우저에서는 공유 링크를 열 수 없어요':'공유 링크가 잘렸거나 올바르지 않아요')});
+  if(/^#[psm]=/.test(location.hash)){
+    toast('공유받은 플레이리스트를 불러오는 중이에요',true);
+    readShare(location.hash).then(st=>{hideToast();if(st)enterView(st);boot();loadYT()}).catch(e=>{console.error(e);boot();normalizeThumbs();loadYT();toast({nodecomp:'이 브라우저에서는 공유 링크를 열 수 없어요',gone:'삭제되었거나 없는 공유 링크예요',nocloud:'이 사이트에는 짧은 링크 설정이 없어요',cloud:'공유 링크를 불러오지 못했어요. 잠시 후 다시 열어 주세요'}[e&&e.message]||'공유 링크가 잘렸거나 올바르지 않아요')});
     return;
   }
   boot();normalizeThumbs();loadYT();
