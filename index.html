@@ -732,7 +732,7 @@ function renderSettings(){
   }else if(R.setTab==='fx'){
     h+=`<div class="sb"><h3>움직이는 효과</h3><div class="pick-grid c3">${FX.map(([k,n])=>`<button class="${S.fx===k?'on':''}" data-set="fx" data-v="${k}"><canvas data-prev="${k}" width="160" height="80"></canvas>${n}</button>`).join('')}</div></div>`;
     if(S.fx!=='none')h+=`<div class="sb"><h3>효과 위치</h3>${seg('fxArea',[['photo','사진 위'],['card','카드 전체']],2)}</div>`;
-    h+=`<p class="set-note">화면과 PNG, GIF 저장에 함께 적용돼요. GIF에서는 재생 카드의 레코드판도 함께 돌아가요.</p>`;
+    h+=`<p class="set-note">화면과 GIF 저장에 적용돼요. GIF에서는 재생 카드의 레코드판도 함께 돌아가요.</p>`;
   }else{
     h+=`<div class="sb" style="margin-bottom:0"><h3>백업</h3><div class="data-btns"><button data-act="export">백업 파일 저장</button><button data-act="import">백업 파일 불러오기</button><button class="danger" data-act="reset">전체 초기화</button></div><p class="set-note">내용은 이 브라우저에 저장돼요. 다른 기기로 옮길 때는 백업 파일을 이용하세요.</p></div>`;
   }
@@ -1321,11 +1321,6 @@ async function capturePNG(){
   try{
     const k=capScale(3,14e6);
     const c=await shot($('snap'),k,pageBg());
-    if(S.fx!=='none'){
-      const x=c.getContext('2d');x.setTransform(1,0,0,1,0,0);
-      const sr=$('snap').getBoundingClientRect(),hr=fxHost().getBoundingClientRect();
-      drawFx(x,S.fx,(hr.left-sr.left)*k,(hr.top-sr.top)*k,hr.width*k,hr.height*k,.2,k,fxRadius(k));
-    }
     const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/png'));
     download(blob,fileName('png'));hideToast();toast('PNG로 저장했어요');
   }catch(e){console.error(e);hideToast();toast('저장 중 문제가 생겼어요')}
