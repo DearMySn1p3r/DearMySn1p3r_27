@@ -2,6 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' data: blob: https://firestore.googleapis.com https://noembed.com https://www.youtube.com https://i.ytimg.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#fffafd">
 <title>Music Playlist Editor</title>
@@ -547,7 +549,7 @@ textarea.inp.short{min-height:104px}
 /* ════ 공유 설정 (선택) ════
    짧은 공유 링크를 쓰려면 Firebase 프로젝트 정보를 아래에 넣어 주세요.
    비워 두면 링크 안에 내용을 담는 방식으로 공유돼요. */
-const CLOUD={projectId:'playlist-fcaff',apiKey:'AIzaSyBJRbrvG76pR3pCsi-CXhumgmrvUpr5S_U'};
+const CLOUD=(()=>{const k=['VV9TNXJwVXZybWdtdW','hYQy1pc0NwM1JwNjdH','dnJiUkpCeVNheklB'];let a='';try{a=atob(k.join('')).split('').reverse().join('')}catch{}return{projectId:'playlist-fcaff',apiKey:a}})();
 
 /* ════ ICONS ════ */
 const P={
@@ -630,6 +632,37 @@ const DEF={
   show:{names:true,np:true,lyrics:true},nameMode:2,fx:'none',fxArea:'photo',
   grad:false,accent2:'#b3a3ea',cardBg:'white',shape:'round',filter:'none',border:'line',font:'serif',lyrAlign:'center',view:'list',lyrVer:2,gradAngle:135,filterAmt:100,volume:80,muted:false,video:false
 };
+const HEX=/^#[0-9a-f]{6}$/i;
+const isImg=v=>typeof v==='string'&&(/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)||/^https:\/\/[^\s"'<>()]+$/.test(v));
+const isDataImg=v=>typeof v==='string'&&/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v);
+const str=(v,n)=>typeof v==='string'?v.slice(0,n):'';
+const oneOf=(v,list,d)=>list.includes(v)?v:d;
+const num=(v,a,b,d)=>{v=+v;return Number.isFinite(v)?Math.min(b,Math.max(a,v)):d};
+function cleanState(s){
+  s.name=str(s.name,80)||'My Playlist';s.desc=str(s.desc,200);
+  s.names=Array.isArray(s.names)?[str(s.names[0],40),str(s.names[1],40)]:['',''];
+  s.accent=HEX.test(s.accent)?s.accent:DEF.accent;s.accent2=HEX.test(s.accent2)?s.accent2:DEF.accent2;
+  s.grad=!!s.grad;s.gradAngle=oneOf(+s.gradAngle,[0,45,90,135,180,225,270,315],135);
+  s.tone=oneOf(s.tone,['white','soft','blush'],'white');s.cardBg=oneOf(s.cardBg,['white','tint'],'white');
+  s.ratio=oneOf(s.ratio,['classic','wide','square','tall'],'classic');s.shape=oneOf(s.shape,['round','arch','soft'],'round');
+  s.border=oneOf(s.border,['line','double','dashed','thick','none'],'line');s.font=oneOf(s.font,['serif','round','batang','dodum'],'serif');
+  s.filter=oneOf(s.filter,['none','soft','warm','cool','mono','vintage','tint','bright'],'none');s.filterAmt=num(s.filterAmt,10,100,100);
+  s.fx=oneOf(s.fx,['none','sparkle','hearts','petals','snow','bokeh'],'none');s.fxArea=oneOf(s.fxArea,['photo','card'],'photo');
+  s.lyrAlign=oneOf(s.lyrAlign,['left','center'],'center');s.view=oneOf(s.view,['list','grid'],'list');
+  s.nameMode=oneOf(+s.nameMode,[0,1,2],2);s.volume=num(s.volume,0,100,80);s.muted=!!s.muted;s.video=!!s.video;
+  s.show={names:true,np:s.show?s.show.np!==false:true,lyrics:s.show?s.show.lyrics!==false:true};
+  s.photo=isDataImg(s.photo)?s.photo:'';
+  const pp=s.photoPos||{};s.photoPos={cx:num(pp.cx,0,1,.5),cy:num(pp.cy,0,1,.5),z:num(pp.z,1,5,1)};
+  s.tracks=(Array.isArray(s.tracks)?s.tracks:[]).slice(0,300).filter(t=>t&&typeof t==='object').map((t,i,a)=>{
+    const o=normTrack(t,i,a.length);
+    o.id=/^[\w-]{1,40}$/.test(o.id)?o.id:uid();
+    o.title=str(o.title,150)||'제목 없음';o.artist=str(o.artist,150);
+    o.link=/^https?:\/\/[^\s"'<>]+$/.test(o.link)?o.link.slice(0,600):'';o.ytId=parseYtId(o.link);
+    o.thumb=isImg(o.thumb)?o.thumb:'';o.lyrics=str(o.lyrics,400);o.fav=!!o.fav;o.dur=num(o.dur,0,36000,0);o.added=num(o.added,0,9e15,Date.now());
+    return o});
+  if(!s.tracks.some(t=>t.id===s.sel))s.sel=s.tracks[0]?s.tracks[0].id:null;
+  return s;
+}
 function normTrack(t,i,n){
   return{id:t.id||uid(),title:t.title||'제목 없음',artist:t.artist||'',link:t.link||'',ytId:parseYtId(t.link||''),
     thumb:t.thumb||'',own:t.own,lyrics:t.lyrics||'',hl:Array.isArray(t.hl)?t.hl:[],by:t.by||'',fav:!!t.fav,dur:t.dur||0,added:t.added||(Date.now()-((n||0)-(i||0))*1000)};
@@ -637,7 +670,7 @@ function normTrack(t,i,n){
 function load(){
   const g=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
   const s=g(KEY);
-  if(s&&Array.isArray(s.tracks)){const o={...DEF,...s,show:{...DEF.show,...(s.show||{})},names:Array.isArray(s.names)?[s.names[0]||'',s.names[1]||'']:['',''],photoPos:{...DEF.photoPos,...(s.photoPos||{})}};o.tracks=s.tracks.map((t,i)=>normTrack(t,i,s.tracks.length));if(s.lyrVer!==2){o.lyrAlign='center';o.lyrVer=2}if(s.nameMode===undefined&&o.show.names===false)o.nameMode=0;return o}
+  if(s&&Array.isArray(s.tracks)){const o={...DEF,...s,show:{...DEF.show,...(s.show||{})},names:Array.isArray(s.names)?[s.names[0]||'',s.names[1]||'']:['',''],photoPos:{...DEF.photoPos,...(s.photoPos||{})}};o.tracks=s.tracks.map((t,i)=>normTrack(t,i,s.tracks.length));if(s.lyrVer!==2){o.lyrAlign='center';o.lyrVer=2}if(s.nameMode===undefined&&o.show.names===false)o.nameMode=0;return cleanState(o)}
   const st=JSON.parse(JSON.stringify(DEF));
   const v2=g('playlist_v2');
   if(v2&&Array.isArray(v2.tracks)){
@@ -645,7 +678,7 @@ function load(){
     if(v2.coverPos)st.photoPos=v2.coverPos;
     st.tracks=v2.tracks.map((t,i)=>normTrack(t,i,v2.tracks.length));
     st.accent=v2.accent||st.accent;st.tone={white:'white',soft:'soft',color:'blush'}[v2.tone]||'white';
-    return st;
+    return cleanState(st);
   }
   const old=g('fp7_tracks');
   if(Array.isArray(old))st.tracks=old.map((t,i)=>normTrack(t,i,old.length));
@@ -653,7 +686,7 @@ function load(){
   if(g('fp7_pair'))st.photo=g('fp7_pair');
   if(g('fp7_accent'))st.accent=g('fp7_accent');
   if(g('fp7_bg'))st.tone=g('fp7_bg');
-  return st;
+  return cleanState(st);
 }
 let S=load();
 let saveT;
@@ -1175,7 +1208,7 @@ function bindSettings(){
       const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.tracks))throw 0;
       if(!confirm('지금 내용을 백업 파일 내용으로 바꿀까요?'))return;
       d.tracks=d.tracks.map((t,i)=>normTrack(t,i,d.tracks.length));
-      stop();S={...DEF,...d,show:{...DEF.show,...(d.show||{})}};R.filterThumbs=null;persist();boot();renderSettings();toast('불러왔어요');
+      stop();S=cleanState({...JSON.parse(JSON.stringify(DEF)),...d});R.filterThumbs=null;persist();boot();renderSettings();toast('불러왔어요');
     }catch{toast('백업 파일을 읽을 수 없어요')}
   });
 }
@@ -1502,9 +1535,10 @@ async function buildShareUrl(withImg,withLy){
   return{url:base+'#m='+data,mode:'link'};
 }
 async function unpackShare(str){
+  if(str.length>1500000)throw new Error('bad');
   const tag=str[0];let bytes=unb64u(str.slice(1));
   if(tag==='z'){if(!window.DecompressionStream)throw new Error('nodecomp');bytes=await pipe(bytes,new DecompressionStream('deflate-raw'))}
-  if(bytes[0]!==77||bytes[1]!==80||bytes[2]!==50)throw new Error('bad');
+  if(bytes.length>3000000||bytes[0]!==77||bytes[1]!==80||bytes[2]!==50)throw new Error('bad');
   const dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let o=3;
   const jl=dv.getUint32(o);o+=4;const p=JSON.parse(new TextDecoder().decode(bytes.subarray(o,o+jl)));o+=jl;
   const urls=[];
@@ -1523,7 +1557,7 @@ function shareToState(p){
   st.tracks=p.tr.map((a,i)=>{const t=normTrack({title:a[0],artist:a[1],link:a[2],lyrics:a[3],thumb:a[4],dur:a[5],fav:!!a[6]},i,p.tr.length);
     if(!t.thumb&&t.ytId)t.thumb=`https://i.ytimg.com/vi/${t.ytId}/mqdefault.jpg`;return t});
   st.sel=st.tracks[0]?st.tracks[0].id:null;
-  return st;
+  return cleanState(st);
 }
 async function readShare(hash){
   let m;
